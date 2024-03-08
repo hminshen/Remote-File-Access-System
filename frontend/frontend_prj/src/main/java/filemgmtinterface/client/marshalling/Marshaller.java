@@ -10,7 +10,7 @@ public class Marshaller {
         int bytesToRead = msg.getBytesToRead();
         String filename = msg.getFilename();
 
-        // Convert integers to network byte order (big-endian)
+        // Convert integers to bytes (big-endian)
         byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
         byte[] offsetBytesBytes = ToBytesUtil.int_to_bytes(offsetBytes);
         byte[] bytesToReadBytes = ToBytesUtil.int_to_bytes(bytesToRead);
@@ -23,6 +23,7 @@ public class Marshaller {
         byte[] messageBytes = new byte[
                 Integer.BYTES * 4 + filenameBytes.length
                 ];
+        // Need to do this manually to add the bytes after each other in the byte array:
         int offset = 0;
         System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
