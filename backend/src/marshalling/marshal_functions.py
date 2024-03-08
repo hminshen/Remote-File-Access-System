@@ -1,5 +1,5 @@
-import struct
 from .message_types.file_access import FileReadMessage, FileClientReadMessage
+from .utils.convert_to_bytes import int_to_bytes
 
 #** Use this function to direct to the different types of marshalling functions, based on the type of the message:
 def marshall_message(message):
@@ -12,9 +12,9 @@ def marshall_message(message):
 def marshall_file_read(message : FileReadMessage):
 
   # Convert integers to network byte order (big-endian)
-  operation_code_bytes = struct.pack(">I", message.operation_code)
-  filename_len_bytes = struct.pack(">I", message.filename_len)
-  content_len_bytes = struct.pack(">I", message.content_len)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  content_len_bytes = int_to_bytes(message.content_len)
 
   # Encode filename as UTF-8 bytes
   filename_bytes = message.filename.encode("utf-8")
@@ -38,10 +38,10 @@ def marshall_file_read(message : FileReadMessage):
 
 def marshall_client_file_read(message : FileClientReadMessage):
   # Convert integers to network byte order (big-endian)
-  operation_code_bytes = struct.pack(">I", message.operation_code)
-  offset_bytes = struct.pack(">I", message.offset_bytes)
-  bytes_to_read = struct.pack(">I", message.bytes_to_read)
-  filename_len = struct.pack(">I", len(message.filename))
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  offset_bytes = int_to_bytes(message.offset_bytes)
+  bytes_to_read = int_to_bytes(message.bytes_to_read)
+  filename_len = int_to_bytes(len(message.filename))
 
   # Encode filename & file contents as UTF-8 bytes
   filename_bytes = message.filename.encode("utf-8")

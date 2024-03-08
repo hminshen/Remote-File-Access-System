@@ -14,8 +14,7 @@ parent = os.path.join(parent, "backend", "src")
 # adding the parent directory to 
 # the sys.path.
 sys.path.append(parent)
-print(parent)
-print(sys.path)
+
 from marshalling import marshal_functions, unmarshal_functions
 from marshalling.message_types.file_access import FileClientReadMessage
 
@@ -31,6 +30,9 @@ operation_code = 1  # File Read
 offset_bytes = 2
 bytes_to_read = 4
 filename = "test.txt"
+
+print("Sending file read request for", bytes_to_read, "bytes from file name:", filename,
+       "with offset bytes of", offset_bytes, "...")
 
 msg = FileClientReadMessage(operation_code, offset_bytes, bytes_to_read, filename)
 
