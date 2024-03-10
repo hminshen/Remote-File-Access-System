@@ -45,7 +45,21 @@ def read_file(filename, offset_bytes, bytes_to_read):
 
     return message
 
-  else:   
+  else:
+    # Check size of file to see if offset bytes exceed the file size:
+    file_stats = os.stat(filepath)
+    if file_stats.st_size <= offset_bytes:
+      # Create Error Message - code 103 for File read error - Invalid Parameters:
+      errorCode = 103
+      errorContent = "Offset Bytes can't be more than the length of the file"
+      msg = ErrorMessage(errorCode, errorContent)
+      print("Error Code",str(errorCode) + ": " + errorContent)
+
+      # And marshal to get the msg bytes:
+      message = marshal_functions.marshall_message(msg)
+
+      return message
+    
     with open(filepath, "rb") as f:
       # Move the file pointer to the specified offset:
       f.seek(offset_bytes)
