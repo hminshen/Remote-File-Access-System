@@ -1,12 +1,32 @@
 from .message_types.file_access import FileReadMessage, FileClientReadMessage
+from .message_types.common_msg import ErrorMessage
 from .utils.convert_to_bytes import int_to_bytes
 
 #** Use this function to direct to the different types of marshalling functions, based on the type of the message:
 def marshall_message(message):
   # Check type of message:
-  if isinstance(message, FileReadMessage):
+  if isinstance(message, ErrorMessage):
+    return marshall_error_msg(message)
+  elif isinstance(message, FileReadMessage):
     return marshall_file_read(message)
   # below here can do elif isinstance(message, FileWriteMessage) .... all the diff cases
+
+def marshall_error_msg(message : ErrorMessage):
+  # Convert integers to network byte order (big-endian)
+  error_code_bytes = int_to_bytes(message.errorCode)
+  error_msg_len_bytes = int_to_bytes(len(message.errMsg))
+
+  # Encode err msg as UTF-8 bytes:
+  error_msg_bytes = message.errMsg.encode("utf-8")
+
+  message_bytes = (
+    error_code_bytes +
+    error_msg_len_bytes + 
+    error_msg_bytes
+  )
+
+  return message_bytes
+
 
 # For server to marshal reply message to client for read file operation
 def marshall_file_read(message : FileReadMessage):

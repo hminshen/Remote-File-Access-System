@@ -1,8 +1,8 @@
 package main.java;
-import main.java.filemgmtinterface.client.Client;
+import main.java.filemgmtinterface.client.ClientUI;
 public class Main {
     // This is the main file to run:
     public static void main(String[] args) {
-        Client.showUI();
+        ClientUI.showUI();
     }
 }

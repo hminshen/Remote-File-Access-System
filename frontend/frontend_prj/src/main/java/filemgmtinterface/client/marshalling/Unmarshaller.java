@@ -1,5 +1,6 @@
 package main.java.filemgmtinterface.client.marshalling;
 
+import main.java.filemgmtinterface.client.messagetypes.ErrorMessage;
 import main.java.filemgmtinterface.client.messagetypes.FileClientReadRespMessage;
 import main.java.filemgmtinterface.client.utils.FromBytesUtil;
 public class Unmarshaller {
@@ -8,6 +9,16 @@ public class Unmarshaller {
         return FromBytesUtil.bytes_to_int(msg, 0);
     }
     // Unmarshalling for when opcode is 1 --> file read response:
+    public static ErrorMessage unmarshallErrorResp(byte[] msg) {
+        int errorCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int errMsgLen = FromBytesUtil.bytes_to_int(msg, 4);
+
+        String errMsg = new String(msg, 8, errMsgLen);
+
+        ErrorMessage response = new ErrorMessage(errorCode, errMsg);
+
+        return response;
+    }
     public static FileClientReadRespMessage unmarshallReadResp(byte[] msg){
         int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
         int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);

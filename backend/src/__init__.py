@@ -28,7 +28,7 @@ while True:
     # If op code = 1: Read file:
     if operation_code == 1:
         offset_bytes, bytes_to_read, filename = marshalling.unmarshal_functions.unmarshall_msg_fileread(data)
-        print("Reading file...")
+        print("Commence File Read operation...")
         message = file_operations.read_file(filename, offset_bytes, bytes_to_read)
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)

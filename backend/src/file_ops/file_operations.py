@@ -1,5 +1,6 @@
 from marshalling import marshal_functions
 from marshalling.message_types.file_access import FileReadMessage
+from marshalling.message_types.common_msg import ErrorMessage
 import os
 import socket
 
@@ -23,13 +24,34 @@ def read_file(filename, offset_bytes, bytes_to_read):
   # Get file path of the file:
   filepath = find_filepath(filename)
   if filepath == "File Not Found":
-    print("File Not Found")
+    # Create Error Message - code 101 for File read error:
+    errorCode = 101
+    msg = ErrorMessage(errorCode, filepath)
+    print("Error Code",str(errorCode) + ": " + filepath)
+
+     # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message
+  elif bytes_to_read < 0:
+    # Create Error Message - code 102 for File read error - Invalid Parameters:
+    errorCode = 102
+    errorContent = "Bytes to Read can't be negative"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+     # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message
+
   else:   
     with open(filepath, "rb") as f:
       # Move the file pointer to the specified offset:
       f.seek(offset_bytes)
 
       # Read the bytes:
+      print("bytes to read:", bytes_to_read)
       data = f.read(bytes_to_read)
 
       # Create the Message for file read:
