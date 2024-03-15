@@ -1,5 +1,5 @@
 from marshalling import marshal_functions
-from marshalling.message_types.file_access import FileReadMessage
+from marshalling.message_types.file_access import FileReadMessage, FileDeleteMessage
 from marshalling.message_types.common_msg import ErrorMessage
 import os
 import socket
@@ -119,3 +119,76 @@ def write_file(buffer_size, filename, sock):
           break
       except socket.timeout:
         print("Timeout waiting for data, expecting more chunks...")
+
+
+# Delete file contents by specified offset bytes and bytes to delete:
+def delete_file_contents(filename, offset_bytes, bytes_to_delete):
+  # Get file path of the file:
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    # Create Error Message - code 401 for File delete content error:
+    errorCode = 401
+    msg = ErrorMessage(errorCode, filepath)
+    print("Error Code",str(errorCode) + ": " + filepath)
+
+     # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message
+  elif bytes_to_delete <= 0:
+    # Create Error Message - code 402 for File delete content error - Invalid Parameters:
+    errorCode = 402
+    errorContent = "Bytes to Delete can't be negative or 0"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+     # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message
+
+  else:
+    # Check size of file to see if offset bytes exceed the file size:
+    file_stats = os.stat(filepath)
+    if file_stats.st_size <= offset_bytes:
+      # Create Error Message - code 403 for File delete content error - Invalid Parameters:
+      errorCode = 403
+      errorContent = "Offset Bytes can't be more than the length of the file"
+      msg = ErrorMessage(errorCode, errorContent)
+      print("Error Code",str(errorCode) + ": " + errorContent)
+
+      # And marshal to get the msg bytes:
+      message = marshal_functions.marshall_message(msg)
+
+      return message
+    
+    newData = b""
+    deletedData = b""
+    with open(filepath, "rb") as f:
+      # Get contents before offset byte:
+      beforeData = b""
+      if offset_bytes > 0:
+        beforeData = f.read(offset_bytes)
+      
+      # Get the contents that is deleted:
+      deletedData = f.read()[offset_bytes: offset_bytes + bytes_to_delete]
+
+      # Move the file pointer to the offset AFTER the portion to delete:
+      f.seek(offset_bytes + bytes_to_delete)
+
+      # Get the contents after the deleted portion:
+      afterData = f.read()[:]
+
+      # Combine the new file contents and overwrite the original file:
+      newData = (beforeData + afterData)
+
+    with open(filepath, 'wb') as f:
+      f.write(newData)
+
+    # Create the Message for file delete content:
+    msg = FileDeleteMessage(4, len(filename), len(deletedData), filename, deletedData)
+    
+    # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message

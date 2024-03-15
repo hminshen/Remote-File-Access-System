@@ -13,7 +13,7 @@ public class ClientUI {
                     + "1. Read a file\n"
                     + "2. Write to a file\n"
                     + "3. Append to a file\n"
-                    + "4. Delete a file\n"
+                    + "4. Delete contents of a file\n"
                     + "0. Exit\n";
             System.out.println(UIMessage);
             try {
@@ -34,6 +34,22 @@ public class ClientUI {
                         System.out.println("Invalid values given, please try again");
                     }
 
+                }
+                // Delete operation:
+                else if (choice == 4) {
+                    try{
+                        System.out.println("Input the filename that you want to delete content from:");
+                        myObj.nextLine();
+                        String filename = myObj.nextLine();
+                        System.out.println("Input the offset bytes to start deleting from:");
+                        int offset_bytes = myObj.nextInt();
+                        System.out.println("Input the number of bytes to delete:");
+                        int num_bytes = myObj.nextInt();
+                        client.sendDeleteRequest(4, offset_bytes, num_bytes, filename);
+                    }
+                    catch (Exception e){
+                        System.out.println("Invalid values given, please try again");
+                    }
                 }
                 else if (choice == 0){
                     System.out.println("Thank you for using our file management system!");

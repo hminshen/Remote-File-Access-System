@@ -1,6 +1,7 @@
 package main.java.filemgmtinterface.client.marshalling;
 
 import main.java.filemgmtinterface.client.messagetypes.ErrorMessage;
+import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteRespMessage;
 import main.java.filemgmtinterface.client.messagetypes.FileClientReadRespMessage;
 import main.java.filemgmtinterface.client.utils.FromBytesUtil;
 public class Unmarshaller {
@@ -29,6 +30,20 @@ public class Unmarshaller {
         String content = new String(msg, 12 + filenameLen, contentLen);
 
         FileClientReadRespMessage response = new FileClientReadRespMessage(operationCode, filenameLen, contentLen, filename, content);
+
+        return response;
+    }
+
+    public static FileClientDeleteRespMessage unmarshallDeleteResp(byte[] msg){
+        int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
+        int content_deletedLen = FromBytesUtil.bytes_to_int(msg, 8);
+
+        String filename = new String(msg, 12, filenameLen);
+        // Content deleted:
+        String content_deleted = new String(msg, 12 + filenameLen, content_deletedLen);
+
+        FileClientDeleteRespMessage response = new FileClientDeleteRespMessage(operationCode, filenameLen, content_deletedLen, filename, content_deleted);
 
         return response;
     }

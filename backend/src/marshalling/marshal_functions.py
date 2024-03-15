@@ -1,4 +1,4 @@
-from .message_types.file_access import FileReadMessage, FileClientReadMessage
+from .message_types.file_access import FileReadMessage, FileClientReadMessage, FileDeleteMessage
 from .message_types.common_msg import ErrorMessage
 from .utils.convert_to_bytes import int_to_bytes
 
@@ -9,6 +9,8 @@ def marshall_message(message):
     return marshall_error_msg(message)
   elif isinstance(message, FileReadMessage):
     return marshall_file_read(message)
+  elif isinstance(message, FileDeleteMessage):
+    return marshall_file_delete(message)
   # below here can do elif isinstance(message, FileWriteMessage) .... all the diff cases
 
 def marshall_error_msg(message : ErrorMessage):
@@ -75,4 +77,28 @@ def marshall_client_file_read(message : FileClientReadMessage):
       filename_bytes 
   )
 
+  return message_bytes
+
+# For server to marshal reply message to client for delete file by bytes operation
+def marshall_file_delete(message : FileDeleteMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  content_deleted_len_bytes = int_to_bytes(message.content_deleted_len)
+
+  # Encode filename as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+
+  # Content is alr in bytes
+  content_deleted_bytes = message.content_deleted
+
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      filename_len_bytes + 
+      content_deleted_len_bytes + 
+      filename_bytes + 
+      content_deleted_bytes 
+  )
+  
   return message_bytes
