@@ -32,6 +32,14 @@ while True:
         message = file_operations.read_file(filename, offset_bytes, bytes_to_read)
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)
+        
+    # If op code = 4: Delete file content:
+    elif operation_code == 4:
+        offset_bytes, bytes_to_delete, filename = marshalling.unmarshal_functions.unmarshall_msg_filedelete(data)
+        print("Commence File Delete content operation...")
+        message = file_operations.delete_file_contents(filename, offset_bytes, bytes_to_delete)
+        print("Sending message of", message, "to ", address, "...")
+        server_socket.sendto(message, address)
 
 # Close the socket
 # server_socket.close()

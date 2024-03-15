@@ -18,6 +18,19 @@ def unmarshall_msg_fileread(data):
 
   return offset_bytes, bytes_to_read, filename
 
+# Op code 4 --> Delete content Operation
+
+# Unmarshalling from client to retrieve offset_bytes, bytes_to_delete and filename to delete bytes from:
+def unmarshall_msg_filedelete(data):
+  offset_bytes = bytes_to_int(data[4:8]) # Integer is 4 bytes
+  bytes_to_delete = bytes_to_int(data[8:12]) # Integer is 4 bytes
+  filename_len = bytes_to_int(data[12:16]) # Integer is 4 bytes
+
+  # Extract filename:
+  filename = data[16: 16 + filename_len].decode("utf-8")
+
+  return offset_bytes, bytes_to_delete, filename
+
 # Test function for python client to unmarshal message from server with file contents (will re-implement in java in future)
 def unmarshall_msg_clientread(data):
   
