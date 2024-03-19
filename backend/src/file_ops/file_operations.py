@@ -161,6 +161,17 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
       message = marshal_functions.marshall_message(msg)
 
       return message
+    elif file_stats.st_size - offset_bytes <=  bytes_to_delete:
+      # Create Error Message - code 404 for File delete content error - Invalid Parameters:
+      errorCode = 404
+      errorContent = "From offset bytes given at " + str(offset_bytes) + ", bytes to delete can't exceed the length of the file"
+      msg = ErrorMessage(errorCode, errorContent)
+      print("Error Code",str(errorCode) + ": " + errorContent)
+
+      # And marshal to get the msg bytes:
+      message = marshal_functions.marshall_message(msg)
+
+      return message
     
     newData = b""
     deletedData = b""
