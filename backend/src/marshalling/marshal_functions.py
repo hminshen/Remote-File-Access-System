@@ -1,4 +1,4 @@
-from .message_types.file_access import FileReadMessage, FileClientReadMessage
+from .message_types.file_access import FileCreateDir, FileReadMessage, FileClientReadMessage
 from .message_types.common_msg import ErrorMessage
 from .utils.convert_to_bytes import int_to_bytes
 
@@ -9,6 +9,8 @@ def marshall_message(message):
     return marshall_error_msg(message)
   elif isinstance(message, FileReadMessage):
     return marshall_file_read(message)
+  elif isinstance(message, FileCreateDir):
+    return marshall_create_dir(message)
   # below here can do elif isinstance(message, FileWriteMessage) .... all the diff cases
 
 def marshall_error_msg(message : ErrorMessage):
@@ -75,4 +77,19 @@ def marshall_client_file_read(message : FileClientReadMessage):
       filename_bytes 
   )
 
+  return message_bytes
+
+#Create marshall function here for create directory 
+#input type: newMessageType
+#marshall_message function above checks the class of input and route accordingly 
+def marshall_create_dir(message: FileCreateDir):
+  
+   # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  dirname_len_bytes = int_to_bytes(message.dirname_len)
+  dirname_bytes = int_to_bytes(message.dirname)
+
+  #Combine all the marshalled bytes 
+  message_bytes = f"{operation_code_bytes}{dirname_len_bytes}{dirname_bytes}"
+  
   return message_bytes

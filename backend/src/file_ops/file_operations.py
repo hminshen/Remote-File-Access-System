@@ -119,3 +119,21 @@ def write_file(buffer_size, filename, sock):
           break
       except socket.timeout:
         print("Timeout waiting for data, expecting more chunks...")
+
+
+#Insert write directiory function here
+        #Future implementation read write permission 
+def create_dir(dirname):
+  target_folder_name ="test_file"
+  current_dir = os.getcwd() #Get current directory
+  root_dir = os.path.join(current_dir.parent,target_folder_name)
+  target_dir = os.path.join(root_dir,dirname)
+  
+  try:
+    target_dir.mkdir(parents= True) #Create directory, and any parent directory; Check pathlib library
+
+    return f"Created {dirname} at {target_dir} successfully"
+  
+  except FileExistsError:
+    return "Directory already exists!"
+

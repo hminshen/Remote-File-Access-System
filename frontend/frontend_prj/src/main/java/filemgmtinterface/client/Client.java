@@ -62,5 +62,6 @@ public class Client {
             System.out.println(e);
         }
     }
+    //Send create directory request
 
 }

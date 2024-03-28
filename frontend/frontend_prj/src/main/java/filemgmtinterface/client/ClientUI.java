@@ -13,7 +13,7 @@ public class ClientUI {
                     + "1. Read a file\n"
                     + "2. Write to a file\n"
                     + "3. Append to a file\n"
-                    + "4. Delete a file\n"
+                    + "4. Delete a file\n"  //Add Create directory
                     + "0. Exit\n";
             System.out.println(UIMessage);
             try {
@@ -38,6 +38,8 @@ public class ClientUI {
                 else if (choice == 0){
                     System.out.println("Thank you for using our file management system!");
                 }
+
+                //create else if (choice ==2 ) create direcotry
                 else{
                     System.out.println("Please choose a valid number");
                 }

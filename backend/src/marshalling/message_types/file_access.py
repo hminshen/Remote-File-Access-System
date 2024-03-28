@@ -13,3 +13,14 @@ class FileClientReadMessage:
         self.offset_bytes = offset_bytes
         self.bytes_to_read = bytes_to_read
         self.filename = filename
+
+class FileCreateDir:
+    def __init__(self, operation_code, dirname_len, dirname):
+        self.operation_code = operation_code
+        self.dirname_len = dirname_len
+        self.dirname = dirname
+
+#Create a class for write dir
+        #Op code
+        #Length of directory name
+        #Directory name

@@ -33,5 +33,14 @@ while True:
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)
 
+    #Inser the opcode for for make directory 
+    if operation_code == 3:
+        dirname_len, dirname = marshalling.unmarshal_functions.unmarshall_msg_createdir(data)
+        print("Commence Create Directory Operation...")
+        message = file_operations.create_dir(dirname)
+        print("Sending message of", message," to ", address,"..." )
+        server_socket.sendto(message,address)
+
+        
 # Close the socket
 # server_socket.close()
