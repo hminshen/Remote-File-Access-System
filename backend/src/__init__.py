@@ -8,7 +8,7 @@ HOST = "localhost"  # Server's IP address - Set to local host for now
 PORT = 5000  # Set port number
 
 # Create a UDP socket
-server_socket = socket.socket(family=socket.AF_INET # internet
+server_socket = socket.socket(family=socket.AF_INET # IPv4
                               , type=socket.SOCK_DGRAM) # UDP)
 
 # Bind the socket to the specified address and port:
@@ -33,11 +33,39 @@ while True:
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)
         
+    # If op code = 2: Write to file:
+    if operation_code == 2:
+        offset_bytes, filename, content = marshalling.unmarshal_functions.unmarshall_msg_filewrite(data)
+        print("Commence File Write operation...")
+        message = file_operations.write_file(filename, offset_bytes, content)
+        print("Sending message of", message, "to ", address, "...")
+        server_socket.sendto(message, address)
+        
+    # If op code = 3: Monitor file updates:
+    elif operation_code == 3:
+        pass
+        
     # If op code = 4: Delete file content:
     elif operation_code == 4:
         offset_bytes, bytes_to_delete, filename = marshalling.unmarshal_functions.unmarshall_msg_filedelete(data)
         print("Commence File Delete content operation...")
         message = file_operations.delete_file_contents(filename, offset_bytes, bytes_to_delete)
+        print("Sending message of", message, "to ", address, "...")
+        server_socket.sendto(message, address)
+        
+    # If op code = 5: Create file:
+    elif operation_code == 5:
+        filename, content = marshalling.unmarshal_functions.unmarshall_msg_filecreatefile(data)
+        print("Commence File Create operation...")
+        message = file_operations.create_file(filename, content)
+        print("Sending message of", message, "to ", address, "...")
+        server_socket.sendto(message, address)
+        
+    # If op code = 6: Delete file:
+    elif operation_code == 6:
+        filename = marshalling.unmarshal_functions.unmarshall_msg_filedeletefile(data)
+        print("Commence File Delete operation...")
+        message = file_operations.delete_file(filename)
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)
 

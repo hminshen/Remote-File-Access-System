@@ -1,8 +1,9 @@
 from marshalling import marshal_functions
-from marshalling.message_types.file_access import FileReadMessage, FileDeleteMessage
+from marshalling.message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage
 from marshalling.message_types.common_msg import ErrorMessage
 import os
 import socket
+
 
 # Helper function to find filename in test_files folder:
 def find_filepath(filename):
@@ -17,49 +18,46 @@ def find_filepath(filename):
           filepath = os.path.join(file_directory, filename)
           print("File path found at:", filepath)
           return filepath
+        
   return "File Not Found"
+
 
 # Read a file on the server at the specific offset with specified number of bytes:
 def read_file(filename, offset_bytes, bytes_to_read):
   # Get file path of the file:
   filepath = find_filepath(filename)
   if filepath == "File Not Found":
-    # Create Error Message - code 101 for File read error:
+    # Create Error Message - code 101 for File read error - File Not Found:
     errorCode = 101
-    msg = ErrorMessage(errorCode, filepath)
-    print("Error Code",str(errorCode) + ": " + filepath)
-
-     # And marshal to get the msg bytes:
-    message = marshal_functions.marshall_message(msg)
-
-    return message
-  elif bytes_to_read < 0:
-    # Create Error Message - code 102 for File read error - Invalid Parameters:
-    errorCode = 102
-    errorContent = "Bytes to Read can't be negative"
+    errorContent = f"File {filename} not found"
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # And marshal to get the msg bytes:
+     # Marshal to get the msg bytes:
     message = marshal_functions.marshall_message(msg)
-
     return message
+  
+  # If filepath valid, get length of file
+  file_size = os.stat(filepath).st_size
+  
+  # Check if read length is negative or 0:
+  if bytes_to_read <= 0:
+    # Create Error Message - code 102 for File read error - Invalid read length parameter:
+    errorCode = 102
+    errorContent = "Bytes to read can't be negative or 0"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
 
-  else:
-    # Check size of file to see if offset bytes exceed the file size:
-    file_stats = os.stat(filepath)
-    if file_stats.st_size <= offset_bytes:
-      # Create Error Message - code 103 for File read error - Invalid Parameters:
-      errorCode = 103
-      errorContent = "Offset Bytes can't be more than the length of the file"
-      msg = ErrorMessage(errorCode, errorContent)
-      print("Error Code",str(errorCode) + ": " + errorContent)
-
-      # And marshal to get the msg bytes:
-      message = marshal_functions.marshall_message(msg)
-
-      return message
+  # Check if offset is negative or exceeds the file size:
+  elif offset_bytes < 0 or offset_bytes >= file_size:
+    # Create Error Message - code 103 for File read error - Invalid offset parameter:
+    errorCode = 103
+    errorContent = f"Offset must be between 0 and {file_size - 1} bytes"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
     
+  # Else, normal operation
+  else:
     with open(filepath, "rb") as f:
       # Move the file pointer to the specified offset:
       f.seek(offset_bytes)
@@ -70,57 +68,65 @@ def read_file(filename, offset_bytes, bytes_to_read):
 
       # Create the Message for file read:
       msg = FileReadMessage(1, len(filename), len(data), filename, data)
-      
-      # And marshal to get the msg bytes:
-      message = marshal_functions.marshall_message(msg)
-
-      return message
-
-
-# Haven't implement yet
     
-def write_file(buffer_size, filename, sock):
-  # Open a file for writing
-  with open(filename, "wb") as f:
-    received_data = b""
-    expected_size = 0
-
-    while True:
-      try:
-        data, address = sock.recvfrom(buffer_size)
-
-        # Unmarshall the data
-        operation_code, file_size, filename, file_data = marshal_functions.unmarshall_message(data)
-
-        if operation_code != 1:
-          print(f"Unexpected operation code: {operation_code}")
-          continue
-
-        if not expected_size:
-          expected_size = file_size
-
-        # Check if the file size matches the expected size
-        if len(received_data) + len(file_data) > expected_size:
-          print(f"Received data exceeds expected size, discarding...")
-          received_data = b""
-          expected_size = 0
-          continue
-
-        # Append received data
-        received_data += file_data
-
-        # Send acknowledgement (optional)
-        sock.sendto(b"ACK", address)
-
-        if len(received_data) == expected_size:
-          # Write all data to the file
-          f.write(received_data)
-          print(f"File received successfully!")
-          break
-      except socket.timeout:
-        print("Timeout waiting for data, expecting more chunks...")
+  # Finally, marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg)
+  return message
 
 
+# Write specified byte sequence at specified offset to a file on the server
+def write_file(filename, offset_bytes, byte_sequence):
+  # Get file path
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    # Create Error Message - code 201 for File write error - File Not Found:
+    errorCode = 201
+    errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+     # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  
+  # If filepath valid, get length of file
+  file_size = os.stat(filepath).st_size
+  
+  # Check if byte sequence is empty:
+  if len(byte_sequence) == 0:
+    # Create Error Message - code 202 for File write error - Invalid write length parameter:
+    errorCode = 202
+    errorContent = "Input byte sequence can't be empty"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+  
+  # Check if offset bytes is negative or exceeds file size
+  elif offset_bytes < 0 or offset_bytes > file_size:  # Since it's a write, offset can be at the end of the file
+    # Create Error Message - code 203 for File write error - Invalid offset parameter:
+    errorCode = 203
+    errorContent = f"Offset must be between 0 and {file_size} bytes"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+  # Else, normal operation
+  else:
+    with open(filepath, "wb") as f:
+      f.seek(offset_bytes)  # Move the file pointer to the specified offset
+      f.write(byte_sequence)  # Write the byte sequence to the file
+      msg = FileWriteMessage(2, len(filename), len(byte_sequence), filename)  # Create file write ack message object
+    
+  # Finally, marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg) # Marshal message object to get bytes
+  return message  
+
+
+# Monitor the file for changes and send the new content to the client
+def monitor_file(filename):
+  # TODO
+  pass
+
+
+# Non-idempotent operation 1
 # Delete file contents by specified offset bytes and bytes to delete:
 def delete_file_contents(filename, offset_bytes, bytes_to_delete):
   # Get file path of the file:
@@ -128,51 +134,43 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
   if filepath == "File Not Found":
     # Create Error Message - code 401 for File delete content error:
     errorCode = 401
-    msg = ErrorMessage(errorCode, filepath)
-    print("Error Code",str(errorCode) + ": " + filepath)
+    errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # And marshal to get the msg bytes:
+     # Marshal to get the msg bytes:
     message = marshal_functions.marshall_message(msg)
-
     return message
-  elif bytes_to_delete <= 0:
-    # Create Error Message - code 402 for File delete content error - Invalid Parameters:
+  
+  # If filepath valid, get length of file
+  file_size = os.stat(filepath).st_size
+  
+  # Check if delete length is negative or 0:
+  if bytes_to_delete <= 0:
+    # Create Error Message - code 402 for File delete content error - Invalid delete length parameter:
     errorCode = 402
     errorContent = "Bytes to Delete can't be negative or 0"
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # And marshal to get the msg bytes:
-    message = marshal_functions.marshall_message(msg)
+  # Check if offset bytes is negative or exceeds the file size:
+  elif offset_bytes < 0 or offset_bytes >= file_size:
+    # Create Error Message - code 403 for File delete content error - Invalid offset parameter:
+    errorCode = 403
+    errorContent = f"Offset must be between 0 and {file_size - 1} bytes"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
 
-    return message
+  # Check if sum of offset and delete length exceed the file size:
+  elif file_size - offset_bytes <  bytes_to_delete:
+    # Create Error Message - code 404 for File delete content error - Invalid offset or delete length parameters:
+    errorCode = 404
+    errorContent = f"Sum of offset and bytes to delete must be within file size of {file_size} bytes"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
 
+  # Else, normal operation
   else:
-    # Check size of file to see if offset bytes exceed the file size:
-    file_stats = os.stat(filepath)
-    if file_stats.st_size <= offset_bytes:
-      # Create Error Message - code 403 for File delete content error - Invalid Parameters:
-      errorCode = 403
-      errorContent = "Offset Bytes can't be more than the length of the file"
-      msg = ErrorMessage(errorCode, errorContent)
-      print("Error Code",str(errorCode) + ": " + errorContent)
-
-      # And marshal to get the msg bytes:
-      message = marshal_functions.marshall_message(msg)
-
-      return message
-    elif file_stats.st_size - offset_bytes <=  bytes_to_delete:
-      # Create Error Message - code 404 for File delete content error - Invalid Parameters:
-      errorCode = 404
-      errorContent = "From offset bytes given at " + str(offset_bytes) + ", bytes to delete can't exceed the length of the file"
-      msg = ErrorMessage(errorCode, errorContent)
-      print("Error Code",str(errorCode) + ": " + errorContent)
-
-      # And marshal to get the msg bytes:
-      message = marshal_functions.marshall_message(msg)
-
-      return message
-    
     newData = b""
     deletedData = b""
     with open(filepath, "rb") as f:
@@ -193,13 +191,73 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
       # Combine the new file contents and overwrite the original file:
       newData = (beforeData + afterData)
 
-    with open(filepath, 'wb') as f:
-      f.write(newData)
+      with open(filepath, 'wb') as f:
+        f.write(newData)
 
-    # Create the Message for file delete content:
-    msg = FileDeleteMessage(4, len(filename), len(deletedData), filename, deletedData)
+      # Create the Message for file delete content:
+      msg = FileDeleteMessage(4, len(filename), len(deletedData), filename, deletedData)
     
-    # And marshal to get the msg bytes:
-    message = marshal_functions.marshall_message(msg)
+  # Finally, marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg)
+  return message
 
-    return message
+
+# Idempotent operation 1
+# Create new file on server (if file already exists, return error)
+def create_file(filename, content):
+  # Navigate to the test_files directory
+  cwd = os.getcwd()
+  for dir in os.listdir(cwd):
+    if dir == "test_files":
+      file_dir = os.path.join(cwd, dir)
+      break
+
+  # Check if file name has correct extension (.txt)
+  if not filename.endswith(".txt"):
+    # Create Error Message - code 501 for File create error - Invalid file extension
+    errorCode = 501
+    errorContent = "Invalid file extension. File must be a .txt file"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+  # Check if file already exists
+  elif filename in os.listdir(file_dir):
+    # Create Error Message - code 502 for File create error - File already exists
+    errorCode = 502
+    errorContent = "File already exists"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+    
+  else:
+    # Create the file
+    with open(os.path.join(file_dir, filename), "wb") as f:
+      # If content is provided, write the content to the file; else, an empty file is created
+      if content:
+        f.write(content)
+      msg = FileCreateFileMessage(5, len(filename), len(content), filename)
+    
+  # Finally, marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg)
+  return message
+  
+
+# Idempotent operation 2
+# Delete file from server (if file does not exist, return error)
+def delete_file(filename):
+  # Get file path of the file:
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    # Create Error Message - code 601 for File delete error:
+    errorCode = 601
+    errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+  
+  # If filepath valid, delete the file
+  else:
+    os.remove(filepath)
+    msg = FileDeleteFileMessage(6, len(filename), filename)
+    
+  # Finally, marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg)
+  return message

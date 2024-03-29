@@ -1,4 +1,3 @@
-from .marshal_functions import marshall_message, marshall_file_read
-from .unmarshal_functions import unmarshall_msg_fileread, unmarshall_msg_opcode, unmarshall_msg_clientread
-
+from .marshal_functions import marshall_message, marshall_file_read, marshall_file_write, marshall_file_delete, marshall_file_createfile, marshall_file_deletefile
+from .unmarshal_functions import unmarshall_msg_opcode, unmarshall_msg_fileread, unmarshall_msg_filewrite, unmarshall_msg_filedelete, unmarshall_msg_filecreatefile, unmarshall_msg_filedeletefile
 from .message_types import common_msg, file_access

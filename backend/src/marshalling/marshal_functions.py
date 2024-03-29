@@ -1,6 +1,7 @@
-from .message_types.file_access import FileReadMessage, FileClientReadMessage, FileDeleteMessage
+from .message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage
 from .message_types.common_msg import ErrorMessage
 from .utils.convert_to_bytes import int_to_bytes
+
 
 #** Use this function to direct to the different types of marshalling functions, based on the type of the message:
 def marshall_message(message):
@@ -9,9 +10,17 @@ def marshall_message(message):
     return marshall_error_msg(message)
   elif isinstance(message, FileReadMessage):
     return marshall_file_read(message)
+  elif isinstance(message, FileWriteMessage):
+    return marshall_file_write(message)
+  # elif isinstance(message, FileMonitorMessage):
+  #   return marshall_file_monitor(message)
   elif isinstance(message, FileDeleteMessage):
     return marshall_file_delete(message)
-  # below here can do elif isinstance(message, FileWriteMessage) .... all the diff cases
+  elif isinstance(message, FileCreateFileMessage):
+    return marshall_file_createfile(message)
+  elif isinstance(message, FileDeleteFileMessage):
+    return marshall_file_deletefile(message)
+
 
 def marshall_error_msg(message : ErrorMessage):
   # Convert integers to network byte order (big-endian)
@@ -30,7 +39,7 @@ def marshall_error_msg(message : ErrorMessage):
   return message_bytes
 
 
-# For server to marshal reply message to client for read file operation
+# For server to marshal reply message (read bytes) to client for read file operation
 def marshall_file_read(message : FileReadMessage):
 
   # Convert integers to network byte order (big-endian)
@@ -55,15 +64,13 @@ def marshall_file_read(message : FileReadMessage):
   
   return message_bytes
 
-# Test function for python client to marshal message to send to server with offset bytes, bytes to read
-# and filename (will re-implement in java in future)
 
-def marshall_client_file_read(message : FileClientReadMessage):
+# For server to marshal reply message (ack) to client for write file operation
+def marshall_file_write(message : FileWriteMessage):
   # Convert integers to network byte order (big-endian)
   operation_code_bytes = int_to_bytes(message.operation_code)
-  offset_bytes = int_to_bytes(message.offset_bytes)
-  bytes_to_read = int_to_bytes(message.bytes_to_read)
-  filename_len = int_to_bytes(len(message.filename))
+  filename_len_bytes = int_to_bytes(len(message.filename))
+  content_len_bytes = int_to_bytes(len(message.content))
 
   # Encode filename & file contents as UTF-8 bytes
   filename_bytes = message.filename.encode("utf-8")
@@ -71,13 +78,13 @@ def marshall_client_file_read(message : FileClientReadMessage):
   # Combine all parts into a single byte array
   message_bytes = (
       operation_code_bytes + 
-      offset_bytes + 
-      bytes_to_read + 
-      filename_len + 
-      filename_bytes 
+      filename_len_bytes + 
+      content_len_bytes + 
+      filename_bytes
   )
 
   return message_bytes
+
 
 # For server to marshal reply message to client for delete file by bytes operation
 def marshall_file_delete(message : FileDeleteMessage):
@@ -99,6 +106,46 @@ def marshall_file_delete(message : FileDeleteMessage):
       content_deleted_len_bytes + 
       filename_bytes + 
       content_deleted_bytes 
+  )
+  
+  return message_bytes
+
+
+# For server to marshal reply message (ack) to client for create file operation
+def marshall_file_createfile(message : FileCreateFileMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  content_len_bytes = int_to_bytes(message.content_len)
+  
+  # Encode filename as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+  
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      filename_len_bytes + 
+      content_len_bytes +
+      filename_bytes
+  )
+  
+  return message_bytes
+
+
+# For server to marshal reply message (ack) to client for delete file operation
+def marshall_file_deletefile(message : FileDeleteFileMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  
+  # Encode filename as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+  
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      filename_len_bytes + 
+      filename_bytes
   )
   
   return message_bytes
