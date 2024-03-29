@@ -3,7 +3,10 @@ package main.java.filemgmtinterface.client.marshalling;
 import main.java.filemgmtinterface.client.messagetypes.FileClientReadReqMessage;
 import main.java.filemgmtinterface.client.messagetypes.FileClientWriteReqMessage;
 import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteReqMessage;
+import main.java.filemgmtinterface.client.messagetypes.FileClientCreateFileReqMessage;
+import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteFileReqMessage;
 import main.java.filemgmtinterface.client.utils.ToBytesUtil;
+
 
 public class Marshaller {
     public static byte[] marshal(FileClientReadReqMessage msg){
@@ -40,7 +43,6 @@ public class Marshaller {
 
         return messageBytes;
     }
-
 
     public static byte[] marshal(FileClientWriteReqMessage msg){
         int operationCode = msg.getOperationCode();
@@ -80,7 +82,6 @@ public class Marshaller {
         return messageBytes;
     }
 
-
     public static byte[] marshal(FileClientDeleteReqMessage msg){
         int operationCode = msg.getOperationCode();
         int offsetBytes = msg.getOffsetBytes();
@@ -108,6 +109,67 @@ public class Marshaller {
         System.arraycopy(offsetBytesBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
         System.arraycopy(bytesToDeleteBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameBytes, 0, messageBytes, offset, filenameBytes.length);
+
+        return messageBytes;
+    }
+
+    public static byte[] marshal(FileClientCreateFileReqMessage msg){
+        int operationCode = msg.getOperationCode();
+        String filename = msg.getFilename();
+        String content = msg.getContent();
+
+        // Convert integers to bytes (big-endian)
+        byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
+        byte[] filenameLenBytes = ToBytesUtil.int_to_bytes(filename.length());
+        byte[] contentLenBytes = ToBytesUtil.int_to_bytes(content.length());
+
+        // Convert filename and content to UTF-8 bytes
+        byte[] filenameBytes = filename.getBytes();
+        byte[] contentBytes = content.getBytes();
+
+        // Combine all parts into a single byte array
+        byte[] messageBytes = new byte[
+                Integer.BYTES * 3 + filenameBytes.length + contentBytes.length
+                ];
+        
+        // Need to do this manually to add the bytes after each other in the byte array:
+        int offset = 0;
+        System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(contentLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameBytes, 0, messageBytes, offset, filenameBytes.length);
+        offset += filenameBytes.length;
+        System.arraycopy(contentBytes, 0, messageBytes, offset, contentBytes.length);
+
+        return messageBytes;
+    }
+
+    public static byte[] marshal(FileClientDeleteFileReqMessage msg){
+        int operationCode = msg.getOperationCode();
+        String filename = msg.getFilename();
+
+        // Convert integers to bytes (big-endian)
+        byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
+        byte[] filenameLenBytes = ToBytesUtil.int_to_bytes(filename.length());
+
+        // Convert filename to UTF-8 bytes
+        byte[] filenameBytes = filename.getBytes();
+
+        // Combine all parts into a single byte array
+        byte[] messageBytes = new byte[
+                Integer.BYTES * 2 + filenameBytes.length
+                ];
+        
+        // Need to do this manually to add the bytes after each other in the byte array:
+        int offset = 0;
+        System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
         System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;

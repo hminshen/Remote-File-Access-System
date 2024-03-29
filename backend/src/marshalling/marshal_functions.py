@@ -69,8 +69,8 @@ def marshall_file_read(message : FileReadMessage):
 def marshall_file_write(message : FileWriteMessage):
   # Convert integers to network byte order (big-endian)
   operation_code_bytes = int_to_bytes(message.operation_code)
-  filename_len_bytes = int_to_bytes(len(message.filename))
-  content_len_bytes = int_to_bytes(len(message.content))
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  content_len_bytes = int_to_bytes(message.content_len)
 
   # Encode filename & file contents as UTF-8 bytes
   filename_bytes = message.filename.encode("utf-8")

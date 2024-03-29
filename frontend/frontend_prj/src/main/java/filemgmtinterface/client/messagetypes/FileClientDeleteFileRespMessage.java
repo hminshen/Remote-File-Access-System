@@ -1,15 +1,13 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
-public class FileClientWriteRespMessage {
+public class FileClientDeleteFileRespMessage {
     public int operationCode;
     public int filenameLen;
-    public int contentLen;
     public String filename;
-
-    public FileClientWriteRespMessage(int operationCode, int filenameLen, int contentLen, String filename) {
+    
+    public FileClientDeleteFileRespMessage(int operationCode, int filenameLen, String filename){
         this.operationCode = operationCode;
         this.filenameLen = filenameLen;
-        this.contentLen = contentLen;
         this.filename = filename;
     }
 
@@ -17,12 +15,8 @@ public class FileClientWriteRespMessage {
         return operationCode;
     }
 
-    public int getFilename_len() {
+    public int getFilenameLen() {
         return filenameLen;
-    }
-
-    public int getContent_len() {
-        return contentLen;
     }
 
     public String getFilename() {

@@ -5,19 +5,34 @@ import os
 import socket
 
 
-# Helper function to find filename in test_files folder:
+# Helper function to find filename in file_storage folder:
 def find_filepath(filename):
-  # Get current path:
+  # Get current path
   cwd = os.getcwd()
-  # Find the file:
+  
+  # Search for file in directory and subdirectories
   for dir in os.listdir(cwd):
-    if dir == "test_files":
-      file_directory = os.path.join(cwd, dir)
-      for root, dirs, files in os.walk(file_directory):
-        if filename in files:
-          filepath = os.path.join(file_directory, filename)
-          print("File path found at:", filepath)
-          return filepath
+    if dir == "file_storage":
+      filepath = os.path.join(cwd, dir, filename)
+      break
+  
+  # Check if file exists
+  if os.path.exists(filepath):
+    print("File path found at:", filepath)
+    return filepath
+  
+  # Alternate method (doesn't work for multi-level filename inputs e.g. "dir1/file.txt"):
+  # # Get current path:
+  # cwd = os.getcwd()
+  # # Find the file:
+  # for dir in os.listdir(cwd):
+  #   if dir == "file_storage":
+  #     file_directory = os.path.join(cwd, dir)
+  #     for root, dirs, files in os.walk(file_directory):
+  #       if filename in files:
+  #         filepath = os.path.join(file_directory, filename)
+  #         print("File path found at:", filepath)
+  #         return filepath
         
   return "File Not Found"
 
@@ -33,7 +48,7 @@ def read_file(filename, offset_bytes, bytes_to_read):
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # Marshal to get the msg bytes:
+    # Marshal to get the msg bytes:
     message = marshal_functions.marshall_message(msg)
     return message
   
@@ -58,6 +73,11 @@ def read_file(filename, offset_bytes, bytes_to_read):
     
   # Else, normal operation
   else:
+    # Truncate read length if it exceeds the file size:
+    if offset_bytes + bytes_to_read > file_size:
+      bytes_to_read = file_size - offset_bytes
+      print(f"Bytes to read exceeds file size, truncating to {bytes_to_read} bytes...")
+    
     with open(filepath, "rb") as f:
       # Move the file pointer to the specified offset:
       f.seek(offset_bytes)
@@ -85,7 +105,7 @@ def write_file(filename, offset_bytes, byte_sequence):
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # Marshal to get the msg bytes:
+    # Marshal to get the msg bytes:
     message = marshal_functions.marshall_message(msg)
     return message
   
@@ -110,9 +130,13 @@ def write_file(filename, offset_bytes, byte_sequence):
 
   # Else, normal operation
   else:
-    with open(filepath, "wb") as f:
-      f.seek(offset_bytes)  # Move the file pointer to the specified offset
-      f.write(byte_sequence)  # Write the byte sequence to the file
+    # Simple method to insert into string (there are other ways to do this)
+    with open(filepath, "rb+") as f:
+      f.seek(offset_bytes)    # Move the file pointer to the specified offset
+      to_append = f.read()    # Read the contents after the offset
+      f.seek(offset_bytes)    # Move pointer back to offset
+      f.write(byte_sequence)  # Write the byte sequence at the offset index
+      f.write(to_append)      # Rewrite the contents after the offset back to the file
       msg = FileWriteMessage(2, len(filename), len(byte_sequence), filename)  # Create file write ack message object
     
   # Finally, marshal to get the msg bytes:
@@ -138,7 +162,7 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
-     # Marshal to get the msg bytes:
+    # Marshal to get the msg bytes:
     message = marshal_functions.marshall_message(msg)
     return message
   
@@ -193,7 +217,7 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
 
       with open(filepath, 'wb') as f:
         f.write(newData)
-
+      
       # Create the Message for file delete content:
       msg = FileDeleteMessage(4, len(filename), len(deletedData), filename, deletedData)
     
@@ -205,10 +229,10 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
 # Idempotent operation 1
 # Create new file on server (if file already exists, return error)
 def create_file(filename, content):
-  # Navigate to the test_files directory
+  # Navigate to the file_storage directory
   cwd = os.getcwd()
   for dir in os.listdir(cwd):
-    if dir == "test_files":
+    if dir == "file_storage":
       file_dir = os.path.join(cwd, dir)
       break
 
@@ -244,7 +268,7 @@ def create_file(filename, content):
 # Idempotent operation 2
 # Delete file from server (if file does not exist, return error)
 def delete_file(filename):
-  # Get file path of the file:
+  # Get file path
   filepath = find_filepath(filename)
   if filepath == "File Not Found":
     # Create Error Message - code 601 for File delete error:
