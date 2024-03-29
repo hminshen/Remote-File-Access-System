@@ -93,7 +93,7 @@ public class Client {
 
                 // Print the received filename and content
                 System.out.println("Successful deletion of content from " + response.getFilename() + "!\n");
-                System.out.println("File Contents Deleted: " + response.getContent_deleted());
+                System.out.println("File Contents Deleted: " + response.getDeletedContent());
                 System.out.println("\n\n");
             }
             else{

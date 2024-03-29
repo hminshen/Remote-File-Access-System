@@ -1,16 +1,16 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
-public class FileClientReadReqMessage {
+public class FileClientWriteReqMessage {
     public int operationCode;
     public int offsetBytes;
-    public int bytesToRead;
     public String filename;
+    public String writeSequence;
 
-    public FileClientReadReqMessage(int operationCode, int offsetBytes, int bytesToRead, String filename){
+    public FileClientWriteReqMessage(int operationCode, int offsetBytes, String filename, String writeSequence){
         this.operationCode = operationCode;
         this.offsetBytes = offsetBytes;
-        this.bytesToRead = bytesToRead;
         this.filename = filename;
+        this.writeSequence = writeSequence;
     }
 
     public int getOperationCode() {
@@ -21,11 +21,11 @@ public class FileClientReadReqMessage {
         return offsetBytes;
     }
 
-    public int getBytesToRead() {
-        return bytesToRead;
-    }
-
     public String getFilename() {
         return filename;
+    }
+
+    public String getWriteSequence() {
+        return writeSequence;
     }
 }

@@ -12,8 +12,10 @@ public class ClientUI {
                     + "What would you like to do? (Input your choice number):\n"
                     + "1. Read a file\n"
                     + "2. Write to a file\n"
-                    + "3. Append to a file\n"
+                    + "3. Monitor updates to a file\n"
                     + "4. Delete contents of a file\n"
+                    + "5. Create a new file\n"
+                    + "6. Delete a file\n"
                     + "0. Exit\n";
             System.out.println(UIMessage);
             try {
