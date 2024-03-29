@@ -1,5 +1,5 @@
 from marshalling import marshal_functions
-from marshalling.message_types.file_access import FileReadMessage
+from marshalling.message_types.file_access import FileCreateDir, FileReadMessage
 from marshalling.message_types.common_msg import ErrorMessage
 import os
 import socket
@@ -123,17 +123,41 @@ def write_file(buffer_size, filename, sock):
 
 #Insert write directiory function here
         #Future implementation read write permission 
-def create_dir(dirname):
-  target_folder_name ="test_file"
-  current_dir = os.getcwd() #Get current directory
-  root_dir = os.path.join(current_dir.parent,target_folder_name)
-  target_dir = os.path.join(root_dir,dirname)
+def create_dir(dirName):
+  parent_dir = "Remote-File-Access-System\\backend\\src\\test_files"
+  root_dir = os.getcwd() #Get current directory
+  target_parent_dir = os.path.join(root_dir,parent_dir)
+  target_dir = os.path.join(target_parent_dir, dirName)
   
   try:
-    target_dir.mkdir(parents= True) #Create directory, and any parent directory; Check pathlib library
+    os.mkdir(target_dir) #Create directory
+    msg = FileCreateDir(3, len(dirName), dirName)
+    
+    #marshall to get message bytes
+    msg_bytes = marshal_functions.marshall_create_dir(msg)
 
-    return f"Created {dirname} at {target_dir} successfully"
+    return msg_bytes
   
   except FileExistsError:
-    return "Directory already exists!"
+    
+    # Create Error Message - code 301 Directory already exist
+    errorCode = 301
+    errorContent = "Directory already exist"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
 
+     # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+
+    return message
+
+#List dir
+  
+def list_dir(parentDirName = ''):
+  dir_str =""
+  for (root, dir, files) in os.walk ('.', topdown= False):
+    msg += str(os.join(dir,files) +"\n")
+
+  msg = FileCreateDir(3, len(dir_str),dir_str)
+  msg_bytes = marshal_functions.marshall_create_dir(msg)
+  return msg_bytes

@@ -3,6 +3,7 @@ package main.java.filemgmtinterface.client.messagetypes;
 public class FileClientReadReqMessage {
     public int operationCode;
     public int offsetBytes;
+    
 
     public int getOperationCode() {
         return operationCode;
@@ -28,4 +29,7 @@ public class FileClientReadReqMessage {
         bytesToRead = bytes2Read;
         filename = file_name;
     }
+
+
+
 }

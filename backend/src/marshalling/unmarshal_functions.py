@@ -39,6 +39,6 @@ def unmarshall_msg_clientread(data):
 def unmarshall_msg_createdir(data):
 
   dirname_len = bytes_to_int(data[4:8]) #Integer is 4 bytes
-  dirname = bytes_to_int(data[8:4+dirname_len]).decode("utf-8") 
+  dirname = data[8: 8+dirname_len].decode("utf-8")
 
   return dirname_len, dirname

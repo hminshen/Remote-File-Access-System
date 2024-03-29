@@ -87,9 +87,15 @@ def marshall_create_dir(message: FileCreateDir):
    # Convert integers to network byte order (big-endian)
   operation_code_bytes = int_to_bytes(message.operation_code)
   dirname_len_bytes = int_to_bytes(message.dirname_len)
-  dirname_bytes = int_to_bytes(message.dirname)
+
+  #Encode dirname as UTF-8 Bytes
+  dirname_bytes = message.dirname.encode("utf-8")
 
   #Combine all the marshalled bytes 
-  message_bytes = f"{operation_code_bytes}{dirname_len_bytes}{dirname_bytes}"
+  message_bytes = (
+    operation_code_bytes +
+    dirname_len_bytes +
+    dirname_bytes
+  )
   
   return message_bytes
