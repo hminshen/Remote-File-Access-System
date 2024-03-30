@@ -204,13 +204,10 @@ def delete_file_contents(filename, offset_bytes, bytes_to_delete):
         beforeData = f.read(offset_bytes)
       
       # Get the contents that is deleted:
-      deletedData = f.read()[offset_bytes: offset_bytes + bytes_to_delete]
-
-      # Move the file pointer to the offset AFTER the portion to delete:
-      f.seek(offset_bytes + bytes_to_delete)
+      deletedData = f.read(bytes_to_delete)
 
       # Get the contents after the deleted portion:
-      afterData = f.read()[:]
+      afterData = f.read()
 
       # Combine the new file contents and overwrite the original file:
       newData = (beforeData + afterData)
