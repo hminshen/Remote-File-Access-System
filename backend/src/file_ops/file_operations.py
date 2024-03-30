@@ -124,10 +124,12 @@ def write_file(buffer_size, filename, sock):
 #Insert write directiory function here
         #Future implementation read write permission 
 def create_dir(dirName):
-  parent_dir = "Remote-File-Access-System\\backend\\src\\test_files"
-  root_dir = os.getcwd() #Get current directory
-  target_parent_dir = os.path.join(root_dir,parent_dir)
-  target_dir = os.path.join(target_parent_dir, dirName)
+  
+  root_dir = os.getcwd()
+  #Get the parent directory of file ops
+  cur_dir = os.path.abspath(root_dir)
+  parent_dir = os.path.dirname(cur_dir)
+  target_dir = os.path.join(parent_dir, dirName)
   
   try:
     os.mkdir(target_dir) #Create directory
