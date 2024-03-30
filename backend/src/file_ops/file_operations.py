@@ -126,10 +126,12 @@ def write_file(buffer_size, filename, sock):
 def create_dir(dirName):
   
   root_dir = os.getcwd()
-  #Get the parent directory of file ops
-  cur_dir = os.path.abspath(root_dir)
-  parent_dir = os.path.dirname(cur_dir)
-  target_dir = os.path.join(parent_dir, dirName)
+  #Get Current Directory of file
+  cur_dir = os.path.abspath(__file__)
+  #G to src
+  parent_dir = os.path.dirname(os.path.dirname(cur_dir))
+  target_dir = os.path.join(parent_dir, "test_files")
+  target_dir = os.path.join(target_dir, dirName)
   
   try:
     os.mkdir(target_dir) #Create directory
