@@ -13,8 +13,9 @@ public class ClientUI {
                     + "1. Read a file\n"
                     + "2. Write to a file\n"
                     + "3. Append to a file\n"
-                    + "4. Delete a file\n" // Add Create directory
-                    + "5. Create Directory\n"
+                    + "4. Delete a file\n"
+                    + "7. Create Directory\n"
+                    + "8. List Directory\n"
                     + "0. Exit\n";
             System.out.println(UIMessage);
             try {
@@ -36,16 +37,27 @@ public class ClientUI {
 
                 } else if (choice == 0) {
                     System.out.println("Thank you for using our file management system!");
-                } else if (choice == 5) {
+                } else if (choice == 7) {
                     try {
                         System.out.println("Input name of directory");
                         myObj.nextLine();
                         String dirName = myObj.nextLine();
                         int dirNameLen = dirName.length();
-                        client.sendCreateDirRequest(3, dirNameLen, dirName);
+                        client.sendCreateDirRequest(7, dirNameLen, dirName);
 
                     } catch (Exception e) {
                         System.out.println("Invalid values given please try again");
+                    }
+                } else if (choice == 8) {
+                    try {
+                        System.out.println("Specify directory (Leave blank to list all)");
+                        myObj.nextLine();
+                        String dirName = myObj.nextLine();
+                        int dirNameLen = dirName.length();
+                        client.sendCreateDirRequest(8, dirNameLen, dirName);
+
+                    } catch (Exception e) {
+                        System.out.println("Error encounted");
                     }
                 }
 

@@ -97,15 +97,27 @@ public class Client {
             System.out.println("Received opcode: " + op_code);
 
             // Means Create directory:
-            if (op_code == 3) {
-                System.out.println("Checking File Read Response...");
+            if (op_code == 7) {
+                System.out.println("Checking Dir Create Response...");
                 // Unmarshal the response
                 FileClientCreateDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
 
                 // Print the received filename and content
                 System.out.println("Created directory " + response.getDirName());
                 System.out.println("\n\n");
-            } else {
+            }
+            // Means List directory:
+            else if (op_code == 8) {
+                System.out.println("Checking Dir List Response...");
+                // Unmarshal the response
+                FileClientCreateDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
+
+                // Print the received filename and content
+                System.out.println("Listing Directories...\n" + response.getDirName());
+                System.out.println("\n\n");
+            }
+
+            else {
                 ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
                 System.out.println("Error Code:" + response.getErrorCode());
                 System.out.println("Error Message: " + response.getErrMsg());

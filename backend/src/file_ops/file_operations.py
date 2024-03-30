@@ -125,17 +125,18 @@ def write_file(buffer_size, filename, sock):
         #Future implementation read write permission 
 def create_dir(dirName):
   
-  root_dir = os.getcwd()
   #Get Current Directory of file
   cur_dir = os.path.abspath(__file__)
-  #G to src
+  #Get to src
   parent_dir = os.path.dirname(os.path.dirname(cur_dir))
+  #Enter test_files folder
   target_dir = os.path.join(parent_dir, "test_files")
+  #Create dir
   target_dir = os.path.join(target_dir, dirName)
   
   try:
     os.mkdir(target_dir) #Create directory
-    msg = FileCreateDir(3, len(dirName), dirName)
+    msg = FileCreateDir(7, len(dirName), dirName)
     
     #marshall to get message bytes
     msg_bytes = marshal_functions.marshall_create_dir(msg)
@@ -145,7 +146,7 @@ def create_dir(dirName):
   except FileExistsError:
     
     # Create Error Message - code 301 Directory already exist
-    errorCode = 301
+    errorCode = 701
     errorContent = "Directory already exist"
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
@@ -158,10 +159,42 @@ def create_dir(dirName):
 #List dir
   
 def list_dir(parentDirName = ''):
-  dir_str =""
-  for (root, dir, files) in os.walk ('.', topdown= False):
-    msg += str(os.join(dir,files) +"\n")
 
-  msg = FileCreateDir(3, len(dir_str),dir_str)
-  msg_bytes = marshal_functions.marshall_create_dir(msg)
-  return msg_bytes
+  #Get Current Directory of file
+  cur_dir = os.path.abspath(__file__)
+  #Get to src
+  parent_dir = os.path.dirname(os.path.dirname(cur_dir))
+  #Enter test_files folder
+  target_dir = os.path.join(parent_dir, "test_files")
+  #Get the directory to search for
+  target_dir = os.path.join(target_dir, parentDirName)
+
+  msg =""
+
+  #Search the directories from bottom up
+  for (root, dirs, files) in os.walk (target_dir,topdown= False):
+
+    for name in dirs:
+      msg += str(os.path.join(root,name) +"\n")
+    """
+    #Code to list files
+    for name in files:
+      print("Name in file "+ os.path.join(root,name))
+    """
+
+
+  #Check if msg len = 0
+  if (len(msg)!=0):
+    msg = FileCreateDir(8, len(msg),msg)
+    msg_bytes = marshal_functions.marshall_create_dir(msg)
+    return msg_bytes
+  
+  else:
+    errorCode = 801
+    errorContent = "Directory is empty or Directory does not exist"
+    msg = ErrorMessage(errorCode, errorContent)
+    # And marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  
+ 
