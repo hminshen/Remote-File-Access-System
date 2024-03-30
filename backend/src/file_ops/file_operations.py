@@ -159,6 +159,20 @@ def create_dir(dirName):
 #List dir
   
 def list_dir(parentDirName = ''):
+  #Get Current Directory of file
+  cur_dir = os.path.abspath(__file__)
+  #Get to src
+  parent_dir = os.path.dirname(os.path.dirname(cur_dir))
+  #Enter test_files folder
+  target_dir = os.path.join(parent_dir, "test_files")
+
+  if (len(parentDirName) !=0):
+    #Get the directory to search for
+    target_dir = os.path.join(target_dir, parentDirName)
+    msg = parentDirName + "\n"
+  else:
+    msg = "test_files \n"
+
 
   #Get Current Directory of file
   cur_dir = os.path.abspath(__file__)
@@ -166,16 +180,27 @@ def list_dir(parentDirName = ''):
   parent_dir = os.path.dirname(os.path.dirname(cur_dir))
   #Enter test_files folder
   target_dir = os.path.join(parent_dir, "test_files")
-  #Get the directory to search for
-  target_dir = os.path.join(target_dir, parentDirName)
 
-  msg =""
+  if (len(parentDirName) !=0):
+    #Get the directory to search for
+    target_dir = os.path.join(target_dir, parentDirName)
 
+  msg=""
   #Search the directories from bottom up
-  for (root, dirs, files) in os.walk (target_dir,topdown= False):
+  for (root, dirs, files) in os.walk (target_dir,topdown= True):
+    #Get relative path path from tgt dir
+    relative_path = os.path.relpath(root, target_dir)
 
-    for name in dirs:
-      msg += str(os.path.join(root,name) +"\n")
+    #Calcuulate depth of current dir
+    depth = root.replace(target_dir, '').count(os.sep)
+    
+
+
+    msg +="|   " *(depth) +"|___" +os.path.basename(root) +"\n"
+    #msg +="|   " *(depth) +"|___" +relative_path +"\n"
+
+    for name in files: 
+      msg += "|   " *(depth+1) +"|___" + name + "\n"
     """
     #Code to list files
     for name in files:

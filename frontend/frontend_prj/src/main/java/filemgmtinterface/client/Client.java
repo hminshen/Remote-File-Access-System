@@ -73,7 +73,9 @@ public class Client {
         // Create UDP socket
         try (DatagramSocket clientSocket = new DatagramSocket()) {
             System.out.println("Sending create directory request...");
-            System.out.println("Directory Name: " + dirName + " ;Directory String Length: " + dirNameLen);
+            if (dirNameLen!=0):
+                System.out.println("Directory Name: " + dirName + " ;Directory String Length: " + dirNameLen);
+    
 
             // Create the FileClientReadMessage object
             FileClientCreateDirReqMessage msg = new FileClientCreateDirReqMessage(opCode, dirNameLen, dirName);
