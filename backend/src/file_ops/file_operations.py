@@ -1,8 +1,11 @@
 from marshalling import marshal_functions
 from marshalling.message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage
 from marshalling.message_types.common_msg import ErrorMessage
+from marshalling.message_types.file_monitoring import FileMonitorAckMessage
+from marshalling.utils import threading_classes
 import os
 import socket
+import time
 
 
 # Helper function to find filename in file_storage folder:
@@ -35,6 +38,16 @@ def find_filepath(filename):
   #         return filepath
         
   return "File Not Found"
+
+# Helper function to get last modified time for specified filename in file_storage folder:
+def get_file_modified_time(filename):
+  # Get file path of the file:
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    return filepath
+  else:
+    ti_m = os.path.getmtime(filepath)
+    return ti_m
 
 
 # Read a file on the server at the specific offset with specified number of bytes:
@@ -145,9 +158,42 @@ def write_file(filename, offset_bytes, byte_sequence):
 
 
 # Monitor the file for changes and send the new content to the client
-def monitor_file(filename):
-  # TODO
-  pass
+def monitor_file(server_socket, filename, address, monitorInterval):
+  # Get file path:
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    # Create Error Message - code 301 for Monitoring File error - File Not Found:
+    errorCode = 301
+    errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  elif monitorInterval <= 0:
+    # Create Error Message - code 302 for Monitoring File error - Invalid Monitor Interval:
+    errorCode = 302
+    errorContent = f"Monitoring Interval Can't be less than or equal to 0"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  # Create thread for monitoring file:
+  monThread = threading_classes.MonitoringThread(address, filename, server_socket, monitorInterval)
+  # Start the thread:
+  monThread.start()
+
+  # Create ack message to start tracking:
+  currentTime = time.ctime(time.time())
+  msg = FileMonitorAckMessage(3, monitorInterval, 
+                              len(filename), len(currentTime), 
+                              filename, currentTime)
+  # Marshal to get the msg bytes:
+  message = marshal_functions.marshall_message(msg)
+  return message
 
 
 # Non-idempotent operation 1

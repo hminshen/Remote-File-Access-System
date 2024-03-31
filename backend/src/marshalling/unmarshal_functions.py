@@ -40,6 +40,12 @@ def unmarshall_msg_filewrite(data):
 
 # Op code 3 --> Monitor updates operation
 # TODO
+def unmarshall_msg_filemonitorupdates(data):
+  monitorInterval = bytes_to_int(data[4:8]) # Integer is 4 bytes
+  filename_len = bytes_to_int(data[8:12]) # Integer is 4 bytes
+  filename = data[12: 12 + filename_len].decode("utf-8")  # Extract filename
+
+  return monitorInterval, filename
 
 
 # Op code 4 --> Delete content (bytes from file) Operation

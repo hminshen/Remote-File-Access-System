@@ -1,11 +1,6 @@
 package main.java.filemgmtinterface.client.marshalling;
 
-import main.java.filemgmtinterface.client.messagetypes.ErrorMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientReadRespMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientWriteRespMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteRespMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientCreateFileRespMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteFileRespMessage;
+import main.java.filemgmtinterface.client.messagetypes.*;
 import main.java.filemgmtinterface.client.utils.FromBytesUtil;
 
 
@@ -49,6 +44,48 @@ public class Unmarshaller {
         String filename = new String(msg, 12, filenameLen);
 
         FileClientWriteRespMessage response = new FileClientWriteRespMessage(operationCode, filenameLen, contentLen, filename);
+
+        return response;
+    }
+
+    public static FileClientMonitorUpdatesRespMessage unmarshallMonitorUpdatesResp(byte[] msg){
+        int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
+        int updateTimeLen = FromBytesUtil.bytes_to_int(msg, 8);
+        int updatedContentLen = FromBytesUtil.bytes_to_int(msg, 12);
+
+        String filename = new String(msg, 16, filenameLen);
+        String updateTime = new String(msg, 16 + filenameLen, updateTimeLen);
+        String updatedContent = new String(msg, 16 + filenameLen + updateTimeLen, updatedContentLen);
+
+        FileClientMonitorUpdatesRespMessage response = new FileClientMonitorUpdatesRespMessage(operationCode, filename, updateTime, updatedContent);
+
+        return response;
+    }
+
+    public static FileClientMonitorUpdatesAckRespMessage unmarshallMonitorUpdatesAckResp(byte[] msg){
+        int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int monitoringInterval = FromBytesUtil.bytes_to_int(msg, 4);
+        int filenameLen = FromBytesUtil.bytes_to_int(msg, 8);
+        int startTimeLen = FromBytesUtil.bytes_to_int(msg, 12);
+
+        String filename = new String(msg, 16, filenameLen);
+        String startTime = new String(msg, 16 + filenameLen, startTimeLen);
+
+        FileClientMonitorUpdatesAckRespMessage response = new FileClientMonitorUpdatesAckRespMessage(operationCode, monitoringInterval, startTime, filename);
+
+        return response;
+    }
+
+    public static FileClientMonitorUpdatesEndRespMessage unmarshallMonitorUpdatesEndResp(byte[] msg){
+        int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
+        int endTimeLen = FromBytesUtil.bytes_to_int(msg, 8);
+
+        String filename = new String(msg, 12, filenameLen);
+        String endTime = new String(msg, 12 + filenameLen, endTimeLen);
+
+        FileClientMonitorUpdatesEndRespMessage response = new FileClientMonitorUpdatesEndRespMessage(operationCode, filename, endTime);
 
         return response;
     }

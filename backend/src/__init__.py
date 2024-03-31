@@ -43,7 +43,12 @@ while True:
         
     # If op code = 3: Monitor file updates:
     elif operation_code == 3:
-        pass
+        monitorInterval, filename = marshalling.unmarshal_functions.unmarshall_msg_filemonitorupdates(data)
+        print("Commence File Monitor Updates operation...")
+        message = file_operations.monitor_file(server_socket, filename, address, monitorInterval)
+        # This is initial message to send to client - either error or ack to start monitoring
+        print("Sending message of", message, "to ", address, "...")
+        server_socket.sendto(message, address)
         
     # If op code = 4: Delete file content:
     elif operation_code == 4:
