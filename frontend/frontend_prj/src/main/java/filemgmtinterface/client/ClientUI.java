@@ -59,18 +59,19 @@ public class ClientUI {
                     }
                 }
 
-                // // Monitor operation:
-                // else if (choice == 3) {
-                //     try{
-                //         System.out.println("Input the filename that you want to monitor:");
-                //         myObj.nextLine();
-                //         String filename = myObj.nextLine();
-                //         client.sendMonitorRequest(3, filename);
-                //     }
-                //     catch (Exception e){
-                //         System.out.println("Invalid values given, please try again");
-                //     }
-                // }
+                 // Monitor operation:
+                 else if (choice == 3) {
+                     try{
+                         System.out.println("Input the filename that you want to monitor:");
+                         String filename = myObj.nextLine();
+                         System.out.println("Input the monitor interval for the file:");
+                         int monitorInterval = myObj.nextInt();
+                         client.sendMonitorRequest(3, filename, monitorInterval);
+                     }
+                     catch (Exception e){
+                         System.out.println("Invalid values given, please try again");
+                     }
+                 }
 
                 // Delete operation:
                 else if (choice == 4) {

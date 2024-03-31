@@ -1,5 +1,6 @@
 from .message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage
 from .message_types.common_msg import ErrorMessage
+from .message_types.file_monitoring import FileMonitorAckMessage, FileMonitorUpdatesMessage
 from .utils.convert_to_bytes import int_to_bytes
 
 
@@ -12,8 +13,10 @@ def marshall_message(message):
     return marshall_file_read(message)
   elif isinstance(message, FileWriteMessage):
     return marshall_file_write(message)
-  # elif isinstance(message, FileMonitorMessage):
-  #   return marshall_file_monitor(message)
+  elif isinstance(message, FileMonitorUpdatesMessage):
+    return marshall_file_monitor_updates(message)
+  elif isinstance(message, FileMonitorAckMessage):
+    return marshall_file_monitor_ack(message)
   elif isinstance(message, FileDeleteMessage):
     return marshall_file_delete(message)
   elif isinstance(message, FileCreateFileMessage):
@@ -81,6 +84,56 @@ def marshall_file_write(message : FileWriteMessage):
       filename_len_bytes + 
       content_len_bytes + 
       filename_bytes
+  )
+
+  return message_bytes
+
+def marshall_file_monitor_ack(message : FileMonitorAckMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  monitor_interval_bytes = int_to_bytes(message.monitoring_interval)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  currtime_len_bytes = int_to_bytes(message.currtime_len)
+
+  # Encode filename & current time as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+  currtime_bytes = message.currtime.encode("utf-8")
+
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      monitor_interval_bytes +
+      filename_len_bytes + 
+      currtime_len_bytes + 
+      filename_bytes +
+      currtime_bytes
+  )
+
+  return message_bytes
+
+def marshall_file_monitor_updates(message : FileMonitorUpdatesMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  oldcontent_len_bytes = int_to_bytes(message.old_content_len)
+  updatedcontent_len_bytes = int_to_bytes(message.updated_content_len)
+
+  # Encode filename as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+  
+  # Old and Updated Content is alr in bytes
+  oldcontent_bytes = message.oldContent
+  updatedcontent_bytes = message.newContent
+
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      filename_len_bytes + 
+      oldcontent_len_bytes + 
+      updatedcontent_len_bytes +
+      filename_bytes + 
+      oldcontent_bytes +
+      updatedcontent_bytes
   )
 
   return message_bytes

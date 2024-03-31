@@ -106,7 +106,51 @@ public class Client {
         }
     }
 
-    // public void sendMonitorRequest(int operationCode, String filename){}
+    public void sendMonitorRequest(int operationCode, String filename, int monitorInterval){
+        try (DatagramSocket clientSocket = new DatagramSocket()) {
+            System.out.println("Sending monitor file updates request for file name: " + filename + "...\n");
+
+            // Create the FileClientDeleteFileMessage object
+            FileClientMonitorUpdatesReqMessage msg = new FileClientMonitorUpdatesReqMessage(operationCode, filename, monitorInterval);
+
+            // Marshal the message
+            byte[] marshalledMessage = Marshaller.marshal(msg);
+
+            // Create a DatagramPacket with the marshalled message
+            DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length, InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
+
+            // Send the request to the server
+            clientSocket.send(requestPacket);
+
+            // Receive response from the server
+            byte[] buffer = new byte[1024];
+            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+            clientSocket.receive(responsePacket);
+
+            int op_code = Unmarshaller.unmarshal_op_code(buffer);
+            System.out.println("Received opcode: " + op_code);
+            // Means success monitoring ack response:
+            if (op_code == 3){
+                System.out.println("Checking Monitoring File Ack Response...");
+                // Unmarshal the response
+                FileClientMonitorUpdatesAckRespMessage response = Unmarshaller.unmarshallMonitorUpdatesAckResp(buffer);
+
+                // Print response
+                System.out.println("Successfully setup monitoring updates for File:" + response.getFilename() + " at time: " + response.getStartTime() + "!\n");
+                System.out.println("Monitoring Interval: " + response.getMonitoringInterval());
+                System.out.println("\n\n");
+            }
+            else{
+                ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
+                System.out.println("Error Code: " + response.getErrorCode());
+                System.out.println("Error Message: " + response.getErrMsg());
+                System.out.println("\n\n");
+            }
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
 
     public void sendDeleteRequest(int operationCode, int offsetBytes, int bytesToDelete, String filename){
         // Create a UDP socket

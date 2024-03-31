@@ -1,10 +1,6 @@
 package main.java.filemgmtinterface.client.marshalling;
 
-import main.java.filemgmtinterface.client.messagetypes.FileClientReadReqMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientWriteReqMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteReqMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientCreateFileReqMessage;
-import main.java.filemgmtinterface.client.messagetypes.FileClientDeleteFileReqMessage;
+import main.java.filemgmtinterface.client.messagetypes.*;
 import main.java.filemgmtinterface.client.utils.ToBytesUtil;
 
 
@@ -170,6 +166,38 @@ public class Marshaller {
         // Need to do this manually to add the bytes after each other in the byte array:
         int offset = 0;
         System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameBytes, 0, messageBytes, offset, filenameBytes.length);
+
+        return messageBytes;
+    }
+
+    public static byte[] marshal(FileClientMonitorUpdatesReqMessage msg){
+        int operationCode = msg.getOperationCode();
+        String filename = msg.getFilename();
+        int monitorInterval = msg.getMonitorInterval();
+
+        // Convert integers to bytes (big-endian)
+        byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
+        byte[] filenameLenBytes = ToBytesUtil.int_to_bytes(filename.length());
+        byte[] monitorIntervalBytes = ToBytesUtil.int_to_bytes((monitorInterval));
+
+
+        // Convert filename to UTF-8 bytes
+        byte[] filenameBytes = filename.getBytes();
+
+        // Combine all parts into a single byte array
+        byte[] messageBytes = new byte[
+                Integer.BYTES * 3 + filenameBytes.length
+                ];
+
+        // Need to do this manually to add the bytes after each other in the byte array:
+        int offset = 0;
+        System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(monitorIntervalBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
         System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
