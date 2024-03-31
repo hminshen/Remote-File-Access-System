@@ -64,7 +64,7 @@ public class ClientUI {
                      try{
                          System.out.println("Input the filename that you want to monitor:");
                          String filename = myObj.nextLine();
-                         System.out.println("Input the monitor interval for the file:");
+                         System.out.println("Input the monitor interval for the file (in seconds):");
                          int monitorInterval = myObj.nextInt();
                          client.sendMonitorRequest(3, filename, monitorInterval);
                      }

@@ -137,7 +137,7 @@ public class Client {
 
                 // Print response
                 System.out.println("Successfully setup monitoring updates for File:" + response.getFilename() + " at time: " + response.getStartTime() + "!\n");
-                System.out.println("Monitoring Interval: " + response.getMonitoringInterval());
+                System.out.println("Monitoring Interval (in seconds): " + response.getMonitoringInterval());
                 System.out.println("\n\n");
                 while (op_code != 311){
                     buffer = new byte[1024];
