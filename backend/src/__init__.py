@@ -45,9 +45,8 @@ while True:
     elif operation_code == 3:
         monitorInterval, filename = marshalling.unmarshal_functions.unmarshall_msg_filemonitorupdates(data)
         print("Commence File Monitor Updates operation...")
-        print(address)
-        print(monitorInterval, filename)
         message = file_operations.monitor_file(server_socket, filename, address, monitorInterval)
+        # This is initial message to send to client - either error or ack to start monitoring
         print("Sending message of", message, "to ", address, "...")
         server_socket.sendto(message, address)
         

@@ -139,6 +139,37 @@ public class Client {
                 System.out.println("Successfully setup monitoring updates for File:" + response.getFilename() + " at time: " + response.getStartTime() + "!\n");
                 System.out.println("Monitoring Interval: " + response.getMonitoringInterval());
                 System.out.println("\n\n");
+                while (op_code != 311){
+                    buffer = new byte[1024];
+                    responsePacket = new DatagramPacket(buffer, buffer.length);
+                    clientSocket.receive(responsePacket);
+                    op_code = Unmarshaller.unmarshal_op_code(buffer);
+                    // Means monitoring update received:
+                    if (op_code == 310){
+                        System.out.println("Checking Monitoring File Update Response...");
+                        // Unmarshal the response
+                        FileClientMonitorUpdatesRespMessage updateResponse = Unmarshaller.unmarshallMonitorUpdatesResp(buffer);
+                        System.out.println("Filename:" + updateResponse.getFilename() + " Updated at " + updateResponse.getUpdateTime() + ".");
+                        System.out.println("Updated Contents:" + updateResponse.getUpdatedContents());
+                        System.out.println("\n\n");
+                    }
+                    // Means end of monitoring updates - just show the end time here
+                    else if (op_code == 311){
+                        FileClientMonitorUpdatesEndRespMessage updateResponse = Unmarshaller.unmarshallMonitorUpdatesEndResp(buffer);
+                        System.out.println("End of Monitoring Updates for File:" + updateResponse.getFilename() + " at Time:" + updateResponse.getEndTime());
+                        System.out.println("\n\n");
+                        break;
+                    }
+                    // This handles cases when the file has been deleted
+                    else{
+                        ErrorMessage ErrorResponse = Unmarshaller.unmarshallErrorResp(buffer);
+                        System.out.println("Error Code: " + ErrorResponse.getErrorCode());
+                        System.out.println("Error Message: " + ErrorResponse.getErrMsg());
+                        System.out.println("\n\n");
+                        break;
+                    }
+                }
+
             }
             else{
                 ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);

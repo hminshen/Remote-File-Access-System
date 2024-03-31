@@ -5,7 +5,7 @@ from marshalling.message_types.file_monitoring import FileMonitorAckMessage
 from marshalling.utils import threading_classes
 import os
 import socket
-import datetime
+import time
 
 
 # Helper function to find filename in file_storage folder:
@@ -159,13 +159,22 @@ def write_file(filename, offset_bytes, byte_sequence):
 
 # Monitor the file for changes and send the new content to the client
 def monitor_file(server_socket, filename, address, monitorInterval):
-  # TODO
   # Get file path:
   filepath = find_filepath(filename)
   if filepath == "File Not Found":
-    # Create Error Message - code 201 for File write error - File Not Found:
+    # Create Error Message - code 301 for Monitoring File error - File Not Found:
     errorCode = 301
     errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  elif monitorInterval <= 0:
+    # Create Error Message - code 302 for Monitoring File error - Invalid Monitor Interval:
+    errorCode = 302
+    errorContent = f"Monitoring Interval Can't be less than or equal to 0"
     msg = ErrorMessage(errorCode, errorContent)
     print("Error Code",str(errorCode) + ": " + errorContent)
 
@@ -178,10 +187,10 @@ def monitor_file(server_socket, filename, address, monitorInterval):
   monThread.start()
 
   # Create ack message to start tracking:
-  currentTime = datetime.datetime.now()
+  currentTime = time.ctime(time.time())
   msg = FileMonitorAckMessage(3, monitorInterval, 
-                              len(filename), len(str(currentTime)), 
-                              filename, str(currentTime))
+                              len(filename), len(currentTime), 
+                              filename, currentTime)
   # Marshal to get the msg bytes:
   message = marshal_functions.marshall_message(msg)
   return message
