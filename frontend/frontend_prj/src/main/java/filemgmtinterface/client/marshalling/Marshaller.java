@@ -216,4 +216,28 @@ public class Marshaller {
 
         return messageBytes;
     }
+
+    public static byte[] marshal(ErrorMessage msg) {
+        int errorCode = msg.getErrorCode();
+        String errorMsg = msg.getErrMsg();
+
+        byte[] errorCodeBytes = ToBytesUtil.int_to_bytes(errorCode);
+        byte[] errorCodeLenBytes = ToBytesUtil.int_to_bytes(errorMsg.length());
+        byte[] errorMsgBytes = errorMsg.getBytes();
+
+        // Combine message into single byte array
+
+        byte[] messageBytes = new byte[Integer.BYTES * 2 + errorMsgBytes.length];
+
+        // Need to do this manually to add the bytes after each other in the byte array:
+        int offset = 0;
+        System.arraycopy(errorCodeBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(errorCodeLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(errorMsgBytes, 0, messageBytes, offset, errorMsgBytes.length);
+
+        return messageBytes;
+
+    }
 }

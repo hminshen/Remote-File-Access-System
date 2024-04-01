@@ -10,9 +10,54 @@ public class Client {
     public String SERVER_ADDRESS;
     public int SERVER_PORT;
 
+    // Set a timeout of 1000 ms
+    private final int TIMEOUT = 1000;
+    private final int MAX_RETRIES = 3;
+
     public Client(String addr, int port) {
         SERVER_ADDRESS = addr;
         SERVER_PORT = port;
+    }
+
+    private byte[] sendRequestToServer(DatagramSocket clientSocket, DatagramPacket requestPacket) {
+
+        int numberOfTries = 0;
+        byte[] buffer = new byte[1024];
+        while (numberOfTries < 3) {
+            try {
+                // Set the timeout for socket
+                clientSocket.setSoTimeout(TIMEOUT);
+
+                // Send the request to the server
+                clientSocket.send(requestPacket);
+
+                // Receive response from the server
+
+                DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+                clientSocket.receive(responsePacket);
+
+                // int op_code = Unmarshaller.unmarshal_op_code(buffer);
+                // System.out.println("Received opcode: " + op_code);
+                return buffer;
+            } catch (SocketTimeoutException e) {
+                numberOfTries += 1;
+
+                System.out.println("Server Response Timeout; Number of Tries: " + numberOfTries);
+                System.out.println("Retrying...");
+
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+        }
+
+        // Error encountered
+        int errorCode = 901;
+        String errorString = "Maxmum number of retries reached. Connection Timeout; Please retry operation";
+        ErrorMessage errMsg = new ErrorMessage(errorCode, errorString);
+        byte[] marshalledMessage = Marshaller.marshal(errMsg);
+        return marshalledMessage;
+
     }
 
     public void sendReadRequest(int operationCode, int offsetBytes, int bytesToRead, String filename) {
@@ -32,13 +77,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -80,13 +122,16 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+
+            buffer = sendRequestToServer(clientSocket, requestPacket);
+            // // Send the request to the server
+            // clientSocket.send(requestPacket);
+
+            // // Receive response from the server
+            // byte[] buffer = new byte[1024];
+            // DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+            // clientSocket.receive(responsePacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -140,13 +185,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -187,13 +229,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -210,7 +249,7 @@ public class Client {
                 System.out.println("\n\n");
                 while (op_code != 311) {
                     buffer = new byte[1024];
-                    responsePacket = new DatagramPacket(buffer, buffer.length);
+                    DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
                     clientSocket.receive(responsePacket);
                     op_code = Unmarshaller.unmarshal_op_code(buffer);
                     // Means monitoring update received:
@@ -271,13 +310,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -318,13 +354,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -364,13 +397,10 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Send the request to the server
-            clientSocket.send(requestPacket);
-
-            // Receive response from the server
+            // Initalise buffer
             byte[] buffer = new byte[1024];
-            DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            clientSocket.receive(responsePacket);
+            // Send request packet to server through socket
+            buffer = sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
