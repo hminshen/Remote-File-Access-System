@@ -2,12 +2,12 @@ package main.java.filemgmtinterface.client.messagetypes;
 
 import java.util.Objects;
 
-public class FileClientCreateDirRespMessage {
+public class FileClientDirRespMessage {
     private int operationCode;
     private int dirNameLen;
     private String dirName;
 
-    public FileClientCreateDirRespMessage(int operationCode, int dirNameLen, String dirName) {
+    public FileClientDirRespMessage(int operationCode, int dirNameLen, String dirName) {
         this.operationCode = operationCode;
         this.dirNameLen = dirNameLen;
         this.dirName = dirName;

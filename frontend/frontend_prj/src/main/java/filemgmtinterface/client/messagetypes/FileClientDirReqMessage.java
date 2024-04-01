@@ -1,11 +1,11 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
-public class FileClientCreateDirReqMessage {
+public class FileClientDirReqMessage {
     private int operationCode;
     private int dirNameLen;
     private String dirName;
 
-    public FileClientCreateDirReqMessage(int operationCode, int dirNameLen, String dirName) {
+    public FileClientDirReqMessage(int operationCode, int dirNameLen, String dirName) {
         this.operationCode = operationCode;
         this.dirNameLen = dirNameLen;
         this.dirName = dirName;
@@ -35,8 +35,4 @@ public class FileClientCreateDirReqMessage {
         this.dirName = dirName;
     }
 
-
-
 }
-
-

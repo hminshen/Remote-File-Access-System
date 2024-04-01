@@ -1,15 +1,15 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
-public class FileClientReadReqMessage {
+public class FileClientDeleteReqMessage {
     public int operationCode;
     public int offsetBytes;
-    public int bytesToRead;
+    public int bytesToDelete;
     public String filename;
 
-    public FileClientReadReqMessage(int operationCode, int offsetBytes, int bytesToRead, String filename) {
+    public FileClientDeleteReqMessage(int operationCode, int offsetBytes, int bytesToDelete, String filename) {
         this.operationCode = operationCode;
         this.offsetBytes = offsetBytes;
-        this.bytesToRead = bytesToRead;
+        this.bytesToDelete = bytesToDelete;
         this.filename = filename;
     }
 
@@ -21,8 +21,8 @@ public class FileClientReadReqMessage {
         return offsetBytes;
     }
 
-    public int getBytesToRead() {
-        return bytesToRead;
+    public int getBytesToDelete() {
+        return bytesToDelete;
     }
 
     public String getFilename() {
