@@ -1,4 +1,5 @@
 # This is the main server file:
+import random
 import socket
 import marshalling
 from file_ops import file_operations
@@ -7,24 +8,11 @@ from file_ops import file_operations
 HOST = "localhost"  # Server's IP address - Set to local host for now
 PORT = 5000  # Set port number
 
-# Create a UDP socket
-server_socket = socket.socket(family=socket.AF_INET # IPv4
-                              , type=socket.SOCK_DGRAM) # UDP)
 
-# Bind the socket to the specified address and port:
-server_socket.bind((HOST, PORT))
 
-print(f"Server listening on {HOST}:{PORT}")
 
-while True:
-    # Receive data from the client
-    data, address = server_socket.recvfrom(1024)  # Buffer size for receiving data
 
-    # Unmarshall data to get op code
-    operation_code = marshalling.unmarshal_functions.unmarshall_msg_opcode(data)
-
-    print(f"Operation code: {operation_code}")
-
+def process_data(operation_code,server_socket, data,address):
     # If op code = 1: Read file:
     if operation_code == 1:
         offset_bytes, bytes_to_read, filename = marshalling.unmarshal_functions.unmarshall_msg_fileread(data)
@@ -89,6 +77,71 @@ while True:
         message = file_operations.list_dir(dirname)
         print("Sending message of", message," to ", address,"..." )
         server_socket.sendto(message,address)
+
+
+
+def main():
+    
+    #User Parameters
+    SEMANTIC = -1  
+    FAULT_RATE = -1
+
+    while(SEMANTIC != 1 and SEMANTIC !=0):
+        print("Please chooes semantic (0 or 1); Default is 0")
+        semnatic_input = input()
+        
+        try: 
+            semnatic_input = int(semnatic_input)
+            SEMANTIC = semnatic_input
+        except ValueError:
+            print("Please enter a valid integer... ")
+
+    while (FAULT_RATE <0 or FAULT_RATE>101 ):
+        print("Please choose simulation fault frequency rate (0% to 100%)")
+        fault_rate_input = input()
+        try: 
+            fault_rate_input = int(fault_rate_input)
+            FAULT_RATE = fault_rate_input
+        except ValueError:
+            print("Please enter a valid integer... ")
+
+    print(f"Semantic scheme: {SEMANTIC} | Simulation Fault rate: {FAULT_RATE}")
+
+    # Create a UDP socket
+    server_socket = socket.socket(family=socket.AF_INET # IPv4
+                                , type=socket.SOCK_DGRAM) # UDP)
+
+    # Bind the socket to the specified address and port:
+    server_socket.bind((HOST, PORT))
+
+    while True:
+        print(f"Server listening on {HOST}:{PORT}")
+        # Receive data from the client
+        data, address = server_socket.recvfrom(1024)  # Buffer size for receiving data
+
+        random_int = random.randint(0,100)
+        if (FAULT_RATE < random_int):
+
+            # Unmarshall data to get op code
+            operation_code = marshalling.unmarshal_functions.unmarshall_msg_opcode(data)
+            process_data(operation_code,server_socket, data,address)
+            print(f"Operation code: {operation_code}")
+            
+        else:
+            print("Simulate data packet drop. Server will not process request")
+            # server_socket.close()
+
+
+main()
+
+
+
+
+
+
+
+
+
 
         
 # Close the socket
