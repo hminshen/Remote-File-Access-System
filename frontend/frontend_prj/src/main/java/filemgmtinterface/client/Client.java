@@ -69,7 +69,7 @@ public class Client {
     }
     // Send create directory request
 
-    public void sendCreateDirRequest(int opCode, int dirNameLen, String dirName) {
+    public void sendDirRequest(int opCode, int dirNameLen, String dirName) {
         // Create UDP socket
         try (DatagramSocket clientSocket = new DatagramSocket()) {
             System.out.println("Sending create directory request...");

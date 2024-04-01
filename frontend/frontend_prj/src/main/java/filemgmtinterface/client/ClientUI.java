@@ -43,7 +43,7 @@ public class ClientUI {
                         myObj.nextLine();
                         String dirName = myObj.nextLine();
                         int dirNameLen = dirName.length();
-                        client.sendCreateDirRequest(7, dirNameLen, dirName);
+                        client.sendDirRequest(7, dirNameLen, dirName);
 
                     } catch (Exception e) {
                         System.out.println("Invalid values given please try again");
@@ -54,7 +54,7 @@ public class ClientUI {
                         myObj.nextLine();
                         String dirName = myObj.nextLine();
                         int dirNameLen = dirName.length();
-                        client.sendCreateDirRequest(8, dirNameLen, dirName);
+                        client.sendDirRequest(8, dirNameLen, dirName);
 
                     } catch (Exception e) {
                         System.out.println("Error encounted");
