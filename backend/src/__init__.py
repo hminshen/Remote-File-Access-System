@@ -112,6 +112,12 @@ while True:
             dirname_len, dirname = marshalling.unmarshal_functions.unmarshall_msg_createdir(data)
             print("Commence List Directory Operation...")
             message = file_operations.list_dir(dirname)
+        # If op code = 10: Get File Attribute:
+        elif operation_code == 10:
+            filename, attribute = marshalling.unmarshal_functions.unmarshall_msg_getattr(data)
+            print("Commence Get File Attribute Operation....")
+            message = file_operations.get_file_attr(filename, attribute)
+
         
     if message is not None:
         # Store response in history if not already recorded (At-Most-Once)

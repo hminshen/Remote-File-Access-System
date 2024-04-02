@@ -1,10 +1,12 @@
 class FileReadMessage:
-    def __init__(self, operation_code, filename_len, content_len, filename, content):
+    def __init__(self, operation_code, filename_len, content_len, modifiedTimeLen, filename, content, modifiedTime):
         self.operation_code = operation_code
         self.filename_len = filename_len
         self.content_len = content_len
+        self.modifiedTimeLen = modifiedTimeLen
         self.filename = filename
         self.content = content
+        self.modifiedTime = modifiedTime
 
 
 class FileWriteMessage:
@@ -44,3 +46,13 @@ class FileCreateDir:
         self.dirname_len = dirname_len
         self.dirname = dirname
 
+class FileGetAttrMessage:
+    def __init__(self, operation_code, filename_len, fileattr_len, fileattrvalue_len ,filename, fileattr, fileattrvalue):
+        self.operation_code = operation_code
+        self.filename_len = filename_len
+        self.fileattr_len = fileattr_len
+        self.fileattrvalue_len = fileattrvalue_len
+        self.filename = filename
+        self.fileattr = fileattr
+        self.fileattrvalue = fileattrvalue
+        
