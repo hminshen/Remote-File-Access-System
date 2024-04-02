@@ -216,6 +216,37 @@ public class Marshaller {
 
         return messageBytes;
     }
+    public static byte[] marshal(FileClientGetAttrReqMessage msg){
+        int operationCode = msg.getOperationCode();
+        String filename = msg.getFilename();
+        String attribute = msg.getFileAttribute();
+
+        // Convert integers to bytes (big-endian)
+        byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
+        byte[] filenameLenBytes = ToBytesUtil.int_to_bytes(filename.length());
+        byte[] fileAttributeLenBytes = ToBytesUtil.int_to_bytes((attribute.length()));
+
+        // Convert filename and file attribute to UTF-8 bytes
+        byte[] filenameBytes = filename.getBytes();
+        byte[] attributeBytes = attribute.getBytes();
+
+        // Combine all parts into a single byte array
+        byte[] messageBytes = new byte[Integer.BYTES * 3 + filenameBytes.length + attributeBytes.length];
+
+        // Need to do this manually to add the bytes after each other in the byte array:
+        int offset = 0;
+        System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(fileAttributeLenBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
+        System.arraycopy(filenameBytes, 0, messageBytes, offset, filenameBytes.length);
+        offset += filenameBytes.length;
+        System.arraycopy(attributeBytes, 0, messageBytes, offset, attributeBytes.length);
+
+        return messageBytes;
+    }
 
     public static byte[] marshal(ErrorMessage msg) {
         int errorCode = msg.getErrorCode();

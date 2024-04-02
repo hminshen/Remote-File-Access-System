@@ -1,5 +1,10 @@
 package main.java.filemgmtinterface.client;
 
+import main.java.filemgmtinterface.client.cache.CacheFileItem;
+import main.java.filemgmtinterface.client.cache.CacheList;
+import main.java.filemgmtinterface.client.messagetypes.FileClientReadReqMessage;
+
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class ClientUI {
@@ -7,6 +12,10 @@ public class ClientUI {
         Client client = new Client("localhost", 5000);
         Scanner myObj = new Scanner(System.in);
         int choice = 0;
+        // Initialize the cache list:
+        CacheList cacheList = new CacheList(new HashMap<FileClientReadReqMessage, CacheFileItem>());
+        // Test initialize freshness interval:
+        int freshness = 20; //20 seconds
         do {
             String UIMessage = "Welcome to the Remote File Management system!\n"
                     + "What would you like to do? (Input your choice number):\n"
@@ -34,7 +43,7 @@ public class ClientUI {
                         int offset_bytes = myObj.nextInt();
                         System.out.println("Input the number of bytes to read:");
                         int num_bytes = myObj.nextInt();
-                        client.sendReadRequest(1, offset_bytes, num_bytes, filename);
+                        client.sendReadRequest(1, offset_bytes, num_bytes, filename, cacheList, freshness);
                     } catch (Exception e) {
                         System.out.println("Invalid values given, please try again");
                     }

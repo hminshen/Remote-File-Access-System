@@ -1,4 +1,4 @@
-from .message_types.file_access import FileCreateDir, FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage
+from .message_types.file_access import FileCreateDir, FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage, FileGetAttrMessage
 from .message_types.common_msg import ErrorMessage
 from .message_types.file_monitoring import FileMonitorEndMessage, FileMonitorAckMessage, FileMonitorUpdatesMessage
 from .utils.convert_to_bytes import int_to_bytes
@@ -27,6 +27,8 @@ def marshall_message(message):
     return marshall_file_createfile(message)
   elif isinstance(message, FileDeleteFileMessage):
     return marshall_file_deletefile(message)
+  elif isinstance(message, FileGetAttrMessage):
+    return marshall_file_getattr(message)
 
 
 def marshall_error_msg(message : ErrorMessage):
@@ -53,9 +55,12 @@ def marshall_file_read(message : FileReadMessage):
   operation_code_bytes = int_to_bytes(message.operation_code)
   filename_len_bytes = int_to_bytes(message.filename_len)
   content_len_bytes = int_to_bytes(message.content_len)
+  modifiedtime_len_bytes = int_to_bytes(message.modifiedTimeLen)
 
-  # Encode filename as UTF-8 bytes
+  # Encode filename and modified time as UTF-8 bytes
   filename_bytes = message.filename.encode("utf-8")
+  modifiedtime_bytes = message.modifiedTime.encode("utf-8")
+
 
   # Content is alr in bytes
   content_bytes = message.content
@@ -65,8 +70,10 @@ def marshall_file_read(message : FileReadMessage):
       operation_code_bytes + 
       filename_len_bytes + 
       content_len_bytes + 
+      modifiedtime_len_bytes +
       filename_bytes + 
-      content_bytes 
+      content_bytes +
+      modifiedtime_bytes
   )
   
   return message_bytes
@@ -246,4 +253,29 @@ def marshall_create_dir(message: FileCreateDir):
     dirname_bytes
   )
     
+  return message_bytes
+
+def marshall_file_getattr(message: FileGetAttrMessage):
+  # Convert integers to network byte order (big-endian)
+  operation_code_bytes = int_to_bytes(message.operation_code)
+  filename_len_bytes = int_to_bytes(message.filename_len)
+  fileattr_len_bytes = int_to_bytes(message.fileattr_len)
+  fileattrvalue_len_bytes = int_to_bytes(message.fileattrvalue_len)
+
+  # Encode filename, attr and attrvalue as UTF-8 bytes
+  filename_bytes = message.filename.encode("utf-8")
+  fileattr_bytes = message.fileattr.encode("utf-8")
+  fileattrvalue_bytes = message.fileattrvalue.encode("utf-8")
+
+  # Combine all parts into a single byte array
+  message_bytes = (
+      operation_code_bytes + 
+      filename_len_bytes + 
+      fileattr_len_bytes + 
+      fileattrvalue_len_bytes +
+      filename_bytes + 
+      fileattr_bytes +
+      fileattrvalue_bytes
+  )
+  
   return message_bytes

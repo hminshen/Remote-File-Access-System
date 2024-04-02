@@ -1,9 +1,13 @@
 package main.java.filemgmtinterface.client;
 
+import main.java.filemgmtinterface.client.cache.CacheFileItem;
+import main.java.filemgmtinterface.client.cache.CacheList;
 import main.java.filemgmtinterface.client.messagetypes.*;
 import main.java.filemgmtinterface.client.marshalling.*;
 
 import java.net.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class Client {
@@ -60,9 +64,10 @@ public class Client {
 
     }
 
-    public void sendReadRequest(int operationCode, int offsetBytes, int bytesToRead, String filename) {
+    public void sendReadRequest(int operationCode, int offsetBytes, int bytesToRead, String filename, CacheList cacheList, int freshness) {
         // Create a UDP socket
         try (DatagramSocket clientSocket = new DatagramSocket()) {
+            // if file last modified time later than in cache, means it is not valid, do the steps below:
             System.out.println("Sending file read request for " + bytesToRead + " bytes from file name: " + filename
                     + " with offset bytes of " + offsetBytes + "...\n");
 
@@ -70,6 +75,91 @@ public class Client {
             FileClientReadReqMessage msg = new FileClientReadReqMessage(operationCode, offsetBytes, bytesToRead,
                     filename);
 
+            /* First check if file content exist in cache -- use request message to check */
+            if (cacheList.getCacheFileItem(msg) != null){
+                CacheFileItem cacheFileItem = cacheList.getCacheFileItem(msg);
+                // Get current time and check if cache is still valid:
+                LocalDateTime now = LocalDateTime.now();
+                System.out.println("Last Sync Time for Cached File Contents:" + cacheFileItem.getLastSyncTime());
+                System.out.println("Current Time in Client:" + now);
+
+                if (now.isBefore(cacheFileItem.getLastSyncTime().plusSeconds(freshness))){
+                    // Means Cache is still valid:
+                    System.out.println("Cache content for file:" + filename + " is still valid, reading file contents from cache...");
+                    // Read file contents in cache:
+                    System.out.println("File Contents: " + cacheFileItem.getContent() + "\n\n");
+                    return;
+                }
+                else{
+                    // Means cache is invalid - make req to server to check last modified time:
+                    System.out.println("Cache content for file:" + filename + " is no longer valid, sending request to server to sync " +
+                            "cache...\n");
+
+                    // Create the FileClientGetAttrReqMessage object
+                    FileClientGetAttrReqMessage attrMsg = new FileClientGetAttrReqMessage(10,
+                            filename, "Last Modified Time");
+
+                    // Marshal the message
+                    byte[] marshalledMessage = Marshaller.marshal(attrMsg);
+
+                    // Create a DatagramPacket with the marshalled message
+                    DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
+                            InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
+
+                    // Send request packet to server through socket
+                    byte[] buffer = sendRequestToServer(clientSocket, requestPacket);
+
+                    int op_code = Unmarshaller.unmarshal_op_code(buffer);
+                    System.out.println("Received opcode: " + op_code);
+
+                    // Means read response:
+                    if (op_code == 10) {
+                        System.out.println("Checking File Get Last Modified Time Response...");
+                        // Unmarshal the response
+                        FileClientGetAttrRespMessage response = Unmarshaller.unmarshallGetAttrFileResp(buffer);
+
+                        // Print the received attribute and its value
+                        System.out.println("Attribute:" + response.getFileAttribute() + " received for " +
+                                response.getFilename());
+                        System.out.println("Value: " + response.getFileAttributeValue());
+                        System.out.println("\n");
+
+                        if (response.getFileAttribute().equals("Last Modified Time")) {
+                            System.out.println("Comparing File Last Modified Time with Server...");
+
+                            // Format the last modified time received and compare if they are the same
+                            DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy");
+                            LocalDateTime fileModifiedTime = LocalDateTime.from(myFormatObj.parse(response.getFileAttributeValue()));
+                            System.out.println("Last Modified Time in cache:" + cacheFileItem.getLastModifiedTime());
+                            System.out.println("Last Modified Time in server:" + fileModifiedTime);
+
+                            // If same means file was not updated, we can continue using the cache content, and we update the sync time:
+                            if (fileModifiedTime.isEqual(cacheFileItem.getLastModifiedTime())) {
+                                System.out.println("Last Modified Time for file in client cache and server are the same!" + "\n" +
+                                        "Cache content for file:" + filename + " is still valid, reading file contents from cache...");
+                                System.out.println("File Contents: " + cacheFileItem.getContent() + "\n\n");
+
+                                // Update Last sync time to current time:
+                                cacheFileItem.setLastSyncTime(LocalDateTime.now());
+                                return;
+                            } else {
+                                // Not the same means we need to send the request to the server:
+                                System.out.println("Last Modified Time for file in client cache and server are NOT the same!" + "\n" +
+                                        "Cache content for file:" + filename + " is no longer valid, sending request to " +
+                                        "server to get updated file contents...\n");
+                            }
+                        }
+                    }
+                    else {
+                        ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
+                        System.out.println("Error Code: " + response.getErrorCode());
+                        System.out.println("Error Message: " + response.getErrMsg());
+                        System.out.println("Cache Error, proceed as per normal to send File Read Request to Server...");
+                        System.out.println("\n\n");
+                    }
+
+                }
+            }
             // Marshal the message
             byte[] marshalledMessage = Marshaller.marshal(msg);
 
@@ -77,10 +167,8 @@ public class Client {
             DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
                     InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
 
-            // Initalise buffer
-            byte[] buffer = new byte[1024];
             // Send request packet to server through socket
-            buffer = sendRequestToServer(clientSocket, requestPacket);
+            byte[] buffer =  sendRequestToServer(clientSocket, requestPacket);
 
             int op_code = Unmarshaller.unmarshal_op_code(buffer);
             System.out.println("Received opcode: " + op_code);
@@ -94,7 +182,23 @@ public class Client {
                 System.out.println(response.getFilename() + " Received!\n");
                 System.out.println("File Contents: " + response.getContent());
                 System.out.println("\n\n");
-            } else {
+
+                // Add the file to the cache:
+                DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("E MMM d HH:mm:ss yyyy");
+                LocalDateTime fileModifiedTime = LocalDateTime.from(myFormatObj.parse(response.getModifiedTime()));
+                CacheFileItem newCacheFileItem = new CacheFileItem(response.getFilename(), LocalDateTime.now(),
+                        fileModifiedTime, response.getContent());
+
+                // This check is to account for the case where the cache item has expired AND modified time is different
+                if(cacheList.getCacheFileItem(msg) != null){
+                    cacheList.setCacheFileItem(msg, newCacheFileItem);
+                }
+                else{
+                    cacheList.addCacheFileItem(msg, newCacheFileItem);
+                }
+
+            }
+            else {
                 ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
                 System.out.println("Error Code: " + response.getErrorCode());
                 System.out.println("Error Message: " + response.getErrMsg());

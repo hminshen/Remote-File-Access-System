@@ -1,5 +1,5 @@
 from marshalling import marshal_functions
-from marshalling.message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage,FileCreateDir
+from marshalling.message_types.file_access import FileReadMessage, FileWriteMessage, FileDeleteMessage, FileCreateFileMessage, FileDeleteFileMessage,FileCreateDir, FileGetAttrMessage
 from marshalling.message_types.common_msg import ErrorMessage
 from marshalling.message_types.file_monitoring import FileMonitorAckMessage
 from marshalling.utils import threading_classes
@@ -49,6 +49,8 @@ def get_file_modified_time(filename):
     ti_m = os.path.getmtime(filepath)
     return ti_m
 
+def format_file_modified_time(modifiedTime):
+  return time.strftime("%a %b %d %H:%M:%S %Y", time.localtime(modifiedTime))
 
 # Read a file on the server at the specific offset with specified number of bytes:
 def read_file(filename, offset_bytes, bytes_to_read):
@@ -65,8 +67,10 @@ def read_file(filename, offset_bytes, bytes_to_read):
     message = marshal_functions.marshall_message(msg)
     return message
   
-  # If filepath valid, get length of file
+  # If filepath valid, get length of file and last modified time:
   file_size = os.stat(filepath).st_size
+  last_modified_time = os.path.getmtime(filepath)
+  formatted_last_modified_time = format_file_modified_time(last_modified_time)
   
   # Check if read length is negative or 0:
   if bytes_to_read <= 0:
@@ -90,7 +94,6 @@ def read_file(filename, offset_bytes, bytes_to_read):
     if offset_bytes + bytes_to_read > file_size:
       bytes_to_read = file_size - offset_bytes
       print(f"Bytes to read exceeds file size, truncating to {bytes_to_read} bytes...")
-    
     with open(filepath, "rb") as f:
       # Move the file pointer to the specified offset:
       f.seek(offset_bytes)
@@ -100,7 +103,8 @@ def read_file(filename, offset_bytes, bytes_to_read):
       data = f.read(bytes_to_read)
 
       # Create the Message for file read:
-      msg = FileReadMessage(1, len(filename), len(data), filename, data)
+      msg = FileReadMessage(1, len(filename), len(data), len(formatted_last_modified_time), 
+                            filename, data, formatted_last_modified_time)
     
   # Finally, marshal to get the msg bytes:
   message = marshal_functions.marshall_message(msg)
@@ -431,3 +435,38 @@ def list_dir(parentDirName = ''):
     message = marshal_functions.marshall_message(msg)
     return message
   
+# Op code 10 - Get File attribute for client-side caching
+def get_file_attr(filename, attribute):
+  # Get file path of the file:
+  filepath = find_filepath(filename)
+  if filepath == "File Not Found":
+    # Create Error Message - code 1001 for File read error - File Not Found:
+    errorCode = 1001
+    errorContent = f"File {filename} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  if attribute == "Last Modified Time":
+    # Retrieve last modified time from file:
+    last_modified_time = os.path.getmtime(filepath)
+    formatted_last_modified_time = format_file_modified_time(last_modified_time)
+    
+    # Create the Message for file get attr message:
+    msg = FileGetAttrMessage(10, len(filename), len(attribute), len(formatted_last_modified_time), filename, attribute, formatted_last_modified_time)
+    
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
+  else:
+    # Attribute does not exist - Create Error Message - code 1002 for File get Attr error - Attribute Not Found:
+    errorCode = 1002
+    errorContent = f"Attribute {attribute} not found"
+    msg = ErrorMessage(errorCode, errorContent)
+    print("Error Code",str(errorCode) + ": " + errorContent)
+
+    # Marshal to get the msg bytes:
+    message = marshal_functions.marshall_message(msg)
+    return message
