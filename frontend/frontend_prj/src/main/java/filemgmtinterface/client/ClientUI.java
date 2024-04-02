@@ -8,14 +8,12 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ClientUI {
-    public static void showUI() {
+    public static void showUI(int freshness) {
         Client client = new Client("localhost", 5000);
         Scanner myObj = new Scanner(System.in);
         int choice = 0;
         // Initialize the cache list:
         CacheList cacheList = new CacheList(new HashMap<FileClientReadReqMessage, CacheFileItem>());
-        // Test initialize freshness interval:
-        int freshness = 20; //20 seconds
         do {
             String UIMessage = "Welcome to the Remote File Management system!\n"
                     + "What would you like to do? (Input your choice number):\n"
