@@ -190,6 +190,8 @@ public class Client {
                 while (op_code != 311) {
                     buffer = new byte[1024];
                     DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+                    // Disable timeout for socket just for receiving monitoring updates:
+                    clientSocket.setSoTimeout(0);
                     clientSocket.receive(responsePacket);
                     op_code = Unmarshaller.unmarshal_op_code(buffer);
                     // Means monitoring update received:
