@@ -1,5 +1,4 @@
 package main.java.filemgmtinterface.client;
-
 import java.util.Scanner;
 
 public class ClientUI {
@@ -38,7 +37,6 @@ public class ClientUI {
                     } catch (Exception e) {
                         System.out.println("Invalid values given, please try again");
                     }
-
                 }
 
                 // Write operation:

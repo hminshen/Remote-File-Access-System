@@ -333,7 +333,6 @@ def delete_file(filename):
 #Insert write directiory function here
         #Future implementation read write permission 
 def create_dir(dirName):
-  
   #Get Current Directory of file
   cur_dir = os.path.abspath(__file__)
   #Get to src
@@ -353,7 +352,6 @@ def create_dir(dirName):
     return msg_bytes
   
   except FileExistsError:
-    
     # Create Error Message - code 301 Directory already exist
     errorCode = 701
     errorContent = "Directory already exist"
@@ -365,8 +363,8 @@ def create_dir(dirName):
 
     return message
 
+
 #List dir
-  
 def list_dir(parentDirName = ''):
   #Get Current Directory of file
   cur_dir = os.path.abspath(__file__)
@@ -381,7 +379,6 @@ def list_dir(parentDirName = ''):
     msg = parentDirName + "\n"
   else:
     msg = "file_storage \n"
-
 
   #Get Current Directory of file
   cur_dir = os.path.abspath(__file__)
@@ -402,8 +399,6 @@ def list_dir(parentDirName = ''):
 
     #Calcuulate depth of current dir
     depth = root.replace(target_dir, '').count(os.sep)
-    
-
 
     msg +="|   " *(depth) +"|___" +os.path.basename(root) +"\n"
     #msg +="|   " *(depth) +"|___" +relative_path +"\n"
@@ -415,7 +410,6 @@ def list_dir(parentDirName = ''):
     for name in files:
       print("Name in file "+ os.path.join(root,name))
     """
-
 
   #Check if msg len = 0
   if (len(msg)!=0):

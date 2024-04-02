@@ -1,9 +1,13 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class ErrorMessage {
-    public int errorCode;
+    private int errorCode;
+    private String errMsg;
 
-    public String errMsg;
+    public ErrorMessage(int errorCode, String errMsg) {
+        this.errorCode = errorCode;
+        this.errMsg = errMsg;
+    }
 
     public int getErrorCode() {
         return errorCode;
@@ -11,9 +15,5 @@ public class ErrorMessage {
 
     public String getErrMsg() {
         return errMsg;
-    }
-    public ErrorMessage(int errorCode, String errMsg) {
-        this.errorCode = errorCode;
-        this.errMsg = errMsg;
     }
 }

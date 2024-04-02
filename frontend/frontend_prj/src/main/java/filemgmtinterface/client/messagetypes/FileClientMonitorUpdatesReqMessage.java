@@ -1,16 +1,20 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientMonitorUpdatesReqMessage {
-    public int operationCode;
+    private int requestId;
+    private int operationCode;
+    private String filename;
+    private int monitorInterval;
 
-    public String filename;
-
-    public int monitorInterval;
-
-    public FileClientMonitorUpdatesReqMessage(int operationCode, String filename, int monitorInterval) {
+    public FileClientMonitorUpdatesReqMessage(int requestId, int operationCode, String filename, int monitorInterval) {
+        this.requestId = requestId;
         this.operationCode = operationCode;
         this.filename = filename;
         this.monitorInterval = monitorInterval;
+    }
+
+    public int getRequestId() {
+        return requestId;
     }
 
     public int getMonitorInterval() {
