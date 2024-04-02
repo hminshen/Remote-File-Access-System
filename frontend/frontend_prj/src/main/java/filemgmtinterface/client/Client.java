@@ -52,7 +52,7 @@ public class Client {
 
         // Error encountered
         int errorCode = 901;
-        String errorString = "Maxmum number of retries reached. Connection aborted; Please retry operation";
+        String errorString = "Maximum number of retries reached. Connection aborted; Please retry operation";
         ErrorMessage errMsg = new ErrorMessage(errorCode, errorString);
         byte[] marshalledMessage = Marshaller.marshal(errMsg);
         requestId += 1; // Increment request ID
@@ -403,7 +403,7 @@ public class Client {
                 System.out.println("Created directory " + response.getDirName());
                 System.out.println("\n\n");
             }
-            
+
             // Means List directory:
             else if (op_code == 8) {
                 System.out.println("Checking Dir List Response...");
