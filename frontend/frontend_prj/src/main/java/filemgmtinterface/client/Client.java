@@ -12,14 +12,16 @@ public class Client {
     public String SERVER_ADDRESS;
     public int SERVER_PORT;
 
-    private final int TIMEOUT = 1000;   // 1000 ms
-    private final int MAX_RETRIES = 3;
+    private int TIMEOUT;   // 1000 ms
+    private int MAX_RETRIES;
 
     private int requestId = 0;
 
-    public Client(String addr, int port) {
+    public Client(String addr, int port, int max_retry, int timeout) {
         SERVER_ADDRESS = addr;
         SERVER_PORT = port;
+        MAX_RETRIES = max_retry;
+        TIMEOUT = timeout;
     }
 
     private byte[] sendRequestToServer(DatagramSocket clientSocket, DatagramPacket requestPacket) {
@@ -97,7 +99,7 @@ public class Client {
                             "cache...\n");
 
                     // Create the FileClientGetAttrReqMessage object
-                    FileClientGetAttrReqMessage attrMsg = new FileClientGetAttrReqMessage(10,
+                    FileClientGetAttrReqMessage attrMsg = new FileClientGetAttrReqMessage(requestId, 10,
                             filename, "Last Modified Time");
 
                     // Marshal the message

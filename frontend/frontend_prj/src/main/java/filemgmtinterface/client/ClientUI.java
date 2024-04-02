@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class ClientUI {
-    public static void showUI(int freshness) {
-        Client client = new Client("localhost", 5000);
+    public static void showUI(int freshness, int maxretries, int timeout) {
+        Client client = new Client("localhost", 5000, maxretries, timeout);
         Scanner myObj = new Scanner(System.in);
         int choice = 0;
         // Initialize the cache list:
@@ -150,5 +150,6 @@ public class ClientUI {
                 myObj.nextLine();
             }
         } while (choice != 0);
+        myObj.close();
     }
 }
