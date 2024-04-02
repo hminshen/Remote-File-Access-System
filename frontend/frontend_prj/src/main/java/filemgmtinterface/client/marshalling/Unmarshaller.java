@@ -29,13 +29,16 @@ public class Unmarshaller {
         int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
         int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
         int contentLen = FromBytesUtil.bytes_to_int(msg, 8);
+        int modifiedTimeLen = FromBytesUtil.bytes_to_int(msg, 12);
 
-        String filename = new String(msg, 12, filenameLen);
+        String filename = new String(msg, 16, filenameLen);
         // Content stored after filename bytes:
-        String content = new String(msg, 12 + filenameLen, contentLen);
+        String content = new String(msg, 16 + filenameLen, contentLen);
+        // Modified Time stored after file contents bytes:
+        String modifiedTime = new String(msg, 16 + filenameLen + contentLen, modifiedTimeLen);
 
-        FileClientReadRespMessage response = new FileClientReadRespMessage(operationCode, filenameLen, contentLen,
-                filename, content);
+        FileClientReadRespMessage response = new FileClientReadRespMessage(operationCode, filenameLen, contentLen, modifiedTimeLen,
+                filename, content, modifiedTime);
 
         return response;
     }
@@ -144,6 +147,21 @@ public class Unmarshaller {
 
         FileClientDeleteFileRespMessage response = new FileClientDeleteFileRespMessage(operationCode, filenameLen,
                 filename);
+
+        return response;
+    }
+
+    public static FileClientGetAttrRespMessage unmarshallGetAttrFileResp(byte[] msg){
+        int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
+        int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
+        int attributeLen = FromBytesUtil.bytes_to_int(msg, 8);
+        int attributeValueLen = FromBytesUtil.bytes_to_int(msg, 12);
+        String filename = new String(msg, 16, filenameLen);
+        String attribute = new String(msg, 16 + filenameLen, attributeLen);
+        String attributeValue = new String(msg, 16 + filenameLen + attributeLen, attributeValueLen);
+
+        FileClientGetAttrRespMessage response = new FileClientGetAttrRespMessage(operationCode, filename, attribute,
+                attributeValue);
 
         return response;
     }

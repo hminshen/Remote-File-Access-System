@@ -92,3 +92,17 @@ def unmarshall_msg_createdir(data):
   dirname = data[12:(12 + dirname_len)].decode("utf-8")
 
   return dirname_len, dirname
+
+# Op code 10 --> Get file attribute (last modified time) for client-side caching
+def unmarshall_msg_getattr(data):
+  filename_len = bytes_to_int(data[4:8]) # Integer is 4 bytes
+  attr_len = bytes_to_int(data[8:12]) # Integer is 4 bytes
+  
+  # Extract filename
+  filename = data[12: 12 + filename_len].decode("utf-8")
+  
+  # Extract attribute
+  attr_start = 12 + filename_len
+  attr = data[attr_start: attr_start + attr_len].decode("utf-8")
+
+  return filename, attr
