@@ -2,6 +2,7 @@
 import argparse
 import random
 import socket
+import time
 import marshalling
 from file_ops import file_operations
 
@@ -17,6 +18,8 @@ parser.add_argument("--req-loss", type=float, default=0.0,
                     help="Frequency of simulated request loss (0.0 to 1.0)")
 parser.add_argument("--rep-loss", type=float, default=0.0,
                     help="Frequency of simulated reply loss (0.0 to 1.0)")
+parser.add_argument("--rep-delay", type=float, default=0.0,
+                    help="Simulated reply delay in ms")
 args = parser.parse_args()
 
 # Create a UDP socket
@@ -27,6 +30,8 @@ server_socket = socket.socket(family=socket.AF_INET # IPv4
 server_socket.bind((HOST, PORT))
 
 print(f"Server listening on {HOST}:{PORT}")
+print(f"Using RMI semantic: {'At-Most-Once' if args.semantic == 0 else 'At-Least-Once'}, " +
+      f"Request loss frequency: {args.req_loss:.1f}, Reply loss frequency: {args.rep_loss:.1f}")
 
 while True:
     # Receive data from the client
@@ -95,6 +100,11 @@ while True:
         if random.random() < args.rep_loss:
             print("Transmission error (simulated): Reply lost")
             continue    # Reply does not get sent at all
+        
+        # Simulate reply delay
+        if args.rep_delay > 0:
+            print(f"Simulating reply delay of {args.rep_delay} ms")
+            time.sleep(args.rep_delay / 1000)
 
         # Send the message back to the client
         print("Sending message of", message, "to ", address, "...")

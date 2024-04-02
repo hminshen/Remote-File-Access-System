@@ -1,17 +1,13 @@
 package main.java.filemgmtinterface.client;
-
 import main.java.filemgmtinterface.client.messagetypes.*;
 import main.java.filemgmtinterface.client.marshalling.*;
-
 import java.net.*;
-import java.util.Scanner;
 
 public class Client {
     public String SERVER_ADDRESS;
     public int SERVER_PORT;
 
-    // Set a timeout of 1000 ms
-    private final int TIMEOUT = 1000;
+    private final int TIMEOUT = 1000;   // 1000 ms
     private final int MAX_RETRIES = 3;
 
     public Client(String addr, int port) {
@@ -20,25 +16,24 @@ public class Client {
     }
 
     private byte[] sendRequestToServer(DatagramSocket clientSocket, DatagramPacket requestPacket) {
-
         int numberOfTries = 0;
         byte[] buffer = new byte[1024];
-        while (numberOfTries < 3) {
+        while (numberOfTries < MAX_RETRIES) {
             try {
-                // Set the timeout for socket
-                clientSocket.setSoTimeout(TIMEOUT);
-
                 // Send the request to the server
                 clientSocket.send(requestPacket);
 
-                // Receive response from the server
+                // Set the timeout for socket
+                clientSocket.setSoTimeout(TIMEOUT);
 
+                // Receive response from the server
                 DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
                 clientSocket.receive(responsePacket);
 
                 // int op_code = Unmarshaller.unmarshal_op_code(buffer);
                 // System.out.println("Received opcode: " + op_code);
                 return buffer;
+
             } catch (SocketTimeoutException e) {
                 numberOfTries += 1;
 
@@ -48,16 +43,14 @@ public class Client {
             } catch (Exception e) {
                 System.out.println(e);
             }
-
         }
 
         // Error encountered
         int errorCode = 901;
-        String errorString = "Maxmum number of retries reached. Connection Timeout; Please retry operation";
+        String errorString = "Maxmum number of retries reached. Connection aborted; Please retry operation";
         ErrorMessage errMsg = new ErrorMessage(errorCode, errorString);
         byte[] marshalledMessage = Marshaller.marshal(errMsg);
         return marshalledMessage;
-
     }
 
     public void sendReadRequest(int operationCode, int offsetBytes, int bytesToRead, String filename) {
@@ -97,69 +90,6 @@ public class Client {
             } else {
                 ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
                 System.out.println("Error Code: " + response.getErrorCode());
-                System.out.println("Error Message: " + response.getErrMsg());
-                System.out.println("\n\n");
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-    // Send create directory request
-
-    public void sendDirRequest(int opCode, int dirNameLen, String dirName) {
-        // Create UDP socket
-        try (DatagramSocket clientSocket = new DatagramSocket()) {
-            System.out.println("Sending create directory request...");
-            if (dirNameLen != 0) {
-                System.out.println("Directory Name: " + dirName + " ;Directory String Length: " + dirNameLen);
-            }
-
-            // Create the FileClientReadMessage object
-            FileClientDirReqMessage msg = new FileClientDirReqMessage(opCode, dirNameLen, dirName);
-            // Marshal the message
-            byte[] marshalledMessage = Marshaller.marshal(msg);
-            // Create a DatagramPacket with the marshalled message
-            DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
-                    InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
-
-            byte[] buffer = new byte[1024];
-
-            buffer = sendRequestToServer(clientSocket, requestPacket);
-            // // Send the request to the server
-            // clientSocket.send(requestPacket);
-
-            // // Receive response from the server
-            // byte[] buffer = new byte[1024];
-            // DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
-            // clientSocket.receive(responsePacket);
-
-            int op_code = Unmarshaller.unmarshal_op_code(buffer);
-            System.out.println("Received opcode: " + op_code);
-
-            // Means Create directory:
-            if (op_code == 7) {
-                System.out.println("Checking Dir Create Response...");
-                // Unmarshal the response
-                FileClientDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
-
-                // Print the received filename and content
-                System.out.println("Created directory " + response.getDirName());
-                System.out.println("\n\n");
-            }
-            // Means List directory:
-            else if (op_code == 8) {
-                System.out.println("Checking Dir List Response...");
-                // Unmarshal the response
-                FileClientDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
-
-                // Print the received filename and content
-                System.out.println("Listing Directories...\n" + response.getDirName());
-                System.out.println("\n\n");
-            }
-
-            else {
-                ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
-                System.out.println("Error Code:" + response.getErrorCode());
                 System.out.println("Error Message: " + response.getErrMsg());
                 System.out.println("\n\n");
             }
@@ -416,6 +346,68 @@ public class Client {
             } else {
                 ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
                 System.out.println("Error Code: " + response.getErrorCode());
+                System.out.println("Error Message: " + response.getErrMsg());
+                System.out.println("\n\n");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public void sendDirRequest(int opCode, int dirNameLen, String dirName) {
+        // Create UDP socket
+        try (DatagramSocket clientSocket = new DatagramSocket()) {
+            System.out.println("Sending create directory request...");
+            if (dirNameLen != 0) {
+                System.out.println("Directory Name: " + dirName + " ;Directory String Length: " + dirNameLen);
+            }
+
+            // Create the FileClientDirReqMessage object
+            FileClientDirReqMessage msg = new FileClientDirReqMessage(opCode, dirNameLen, dirName);
+            // Marshal the message
+            byte[] marshalledMessage = Marshaller.marshal(msg);
+            // Create a DatagramPacket with the marshalled message
+            DatagramPacket requestPacket = new DatagramPacket(marshalledMessage, marshalledMessage.length,
+                    InetAddress.getByName(SERVER_ADDRESS), SERVER_PORT);
+
+            byte[] buffer = new byte[1024];
+
+            buffer = sendRequestToServer(clientSocket, requestPacket);
+            // // Send the request to the server
+            // clientSocket.send(requestPacket);
+
+            // // Receive response from the server
+            // byte[] buffer = new byte[1024];
+            // DatagramPacket responsePacket = new DatagramPacket(buffer, buffer.length);
+            // clientSocket.receive(responsePacket);
+
+            int op_code = Unmarshaller.unmarshal_op_code(buffer);
+            System.out.println("Received opcode: " + op_code);
+
+            // Means Create directory:
+            if (op_code == 7) {
+                System.out.println("Checking Dir Create Response...");
+                // Unmarshal the response
+                FileClientDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
+
+                // Print the received filename and content
+                System.out.println("Created directory " + response.getDirName());
+                System.out.println("\n\n");
+            }
+            // Means List directory:
+            else if (op_code == 8) {
+                System.out.println("Checking Dir List Response...");
+                // Unmarshal the response
+                FileClientDirRespMessage response = Unmarshaller.unmarshallCreateDirRespo(buffer);
+
+                // Print the received filename and content
+                System.out.println("Listing Directories...\n" + response.getDirName());
+                System.out.println("\n\n");
+            }
+
+            else {
+                ErrorMessage response = Unmarshaller.unmarshallErrorResp(buffer);
+                System.out.println("Error Code:" + response.getErrorCode());
                 System.out.println("Error Message: " + response.getErrMsg());
                 System.out.println("\n\n");
             }

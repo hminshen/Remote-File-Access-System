@@ -109,31 +109,34 @@ public class ClientUI {
                     }
                 }
 
+                // Create directory operation:
                 else if (choice == 7) {
-
                     try {
                         System.out.println("Input name of directory");
                         String dirName = myObj.nextLine();
                         int dirNameLen = dirName.length();
                         client.sendDirRequest(7, dirNameLen, dirName);
-
                     } catch (Exception e) {
                         System.out.println("Invalid values given please try again");
                     }
-                } else if (choice == 8) {
+                }
+                
+                // List directory contents operation:
+                else if (choice == 8) {
                     try {
                         System.out.println("Specify directory (Leave blank to list all)");
                         String dirName = myObj.nextLine();
                         int dirNameLen = dirName.length();
                         client.sendDirRequest(8, dirNameLen, dirName);
-
                     } catch (Exception e) {
                         System.out.println("Error encounted");
                     }
-                } else if (choice == 0) {
+                }
+                
+                // Default
+                else if (choice == 0) {
                     System.out.println("Thank you for using our file management system!");
                 }
-
             } catch (Exception e) {
                 // System.out.println(e);
                 System.out.println("Please input a valid choice");

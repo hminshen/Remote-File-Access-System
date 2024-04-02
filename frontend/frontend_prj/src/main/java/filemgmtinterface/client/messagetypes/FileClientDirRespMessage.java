@@ -1,7 +1,5 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
-import java.util.Objects;
-
 public class FileClientDirRespMessage {
     private int operationCode;
     private int dirNameLen;
