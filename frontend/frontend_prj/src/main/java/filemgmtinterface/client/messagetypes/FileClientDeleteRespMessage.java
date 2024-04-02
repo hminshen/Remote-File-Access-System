@@ -1,11 +1,11 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientDeleteRespMessage {
-    public int operationCode;
-    public int filenameLen;
-    public int deletedContentLen;
-    public String filename;
-    public String deletedContent;
+    private int operationCode;
+    private int filenameLen;
+    private int deletedContentLen;
+    private String filename;
+    private String deletedContent;
 
     public FileClientDeleteRespMessage(int operationCode, int filenameLen, int deletedContentLen, String filename, String deletedContent) {
         this.operationCode = operationCode;

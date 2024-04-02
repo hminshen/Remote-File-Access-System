@@ -3,18 +3,22 @@ package main.java.filemgmtinterface.client.messagetypes;
 import java.util.Objects;
 
 public class FileClientReadReqMessage {
+    private int requestId;
+    private int operationCode;
+    private int offsetBytes;
+    private int bytesToRead;
+    private String filename;
 
-
-    public int operationCode;
-    public int offsetBytes;
-    public int bytesToRead;
-    public String filename;
-
-    public FileClientReadReqMessage(int operationCode, int offsetBytes, int bytesToRead, String filename) {
+    public FileClientReadReqMessage(int requestId, int operationCode, int offsetBytes, int bytesToRead, String filename) {
+        this.requestId = requestId;
         this.operationCode = operationCode;
         this.offsetBytes = offsetBytes;
         this.bytesToRead = bytesToRead;
         this.filename = filename;
+    }
+
+    public int getRequestId() {
+        return requestId;
     }
 
     public int getOperationCode() {

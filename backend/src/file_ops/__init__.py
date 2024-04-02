@@ -1,3 +1,2 @@
-# Thies folder should hold all the file operations functions, be it read write append or delete:
-
-from .file_operations import find_filepath, read_file, write_file, delete_file_contents, create_file, delete_file
+# This folder should hold all the file operations functions, be it read write append or delete:
+from .file_operations import find_filepath, read_file, write_file, monitor_file, delete_file_contents, create_file, delete_file, create_dir, list_dir

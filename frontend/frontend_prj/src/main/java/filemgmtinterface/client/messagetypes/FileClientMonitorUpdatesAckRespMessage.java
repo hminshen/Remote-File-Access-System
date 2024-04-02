@@ -1,11 +1,10 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientMonitorUpdatesAckRespMessage {
-    public int operationCode;
-    public int monitoringInterval;
-    public String startTime;
-
-    public String filename;
+    private int operationCode;
+    private int monitoringInterval;
+    private String startTime;
+    private String filename;
 
     public FileClientMonitorUpdatesAckRespMessage(int operationCode, int monitoringInterval, String startTime, String filename) {
         this.operationCode = operationCode;

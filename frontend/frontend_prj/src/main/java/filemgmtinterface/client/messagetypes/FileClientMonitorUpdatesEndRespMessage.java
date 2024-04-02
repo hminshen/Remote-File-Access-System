@@ -1,9 +1,9 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientMonitorUpdatesEndRespMessage {
-    public int operationCode;
-    public String filename;
-    public String endTime;
+    private int operationCode;
+    private String filename;
+    private String endTime;
 
     public FileClientMonitorUpdatesEndRespMessage(int operationCode, String filename, String endTime) {
         this.operationCode = operationCode;

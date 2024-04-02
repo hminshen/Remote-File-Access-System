@@ -1,16 +1,22 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientDeleteReqMessage {
-    public int operationCode;
-    public int offsetBytes;
-    public int bytesToDelete;
-    public String filename;
+    private int requestId;
+    private int operationCode;
+    private int offsetBytes;
+    private int bytesToDelete;
+    private String filename;
 
-    public FileClientDeleteReqMessage(int operationCode, int offsetBytes, int bytesToDelete, String filename) {
+    public FileClientDeleteReqMessage(int requestId, int operationCode, int offsetBytes, int bytesToDelete, String filename) {
+        this.requestId = requestId;
         this.operationCode = operationCode;
         this.offsetBytes = offsetBytes;
         this.bytesToDelete = bytesToDelete;
         this.filename = filename;
+    }
+
+    public int getRequestId() {
+        return requestId;
     }
 
     public int getOperationCode() {

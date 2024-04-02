@@ -1,10 +1,10 @@
 package main.java.filemgmtinterface.client.messagetypes;
 
 public class FileClientMonitorUpdatesRespMessage {
-    public int operationCode;
-    public String filename;
-    public String updateTime;
-    public String updatedContents;
+    private int operationCode;
+    private String filename;
+    private String updateTime;
+    private String updatedContents;
 
     public FileClientMonitorUpdatesRespMessage(int operationCode, String filename, String updateTime, String updatedContents) {
         this.operationCode = operationCode;
