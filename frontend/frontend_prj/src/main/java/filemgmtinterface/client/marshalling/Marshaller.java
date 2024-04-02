@@ -243,11 +243,13 @@ public class Marshaller {
         return messageBytes;
     }
     public static byte[] marshal(FileClientGetAttrReqMessage msg){
+        int requestId = msg.getRequestId();
         int operationCode = msg.getOperationCode();
         String filename = msg.getFilename();
         String attribute = msg.getFileAttribute();
 
         // Convert integers to bytes (big-endian)
+        byte[] requestIdBytes = ToBytesUtil.int_to_bytes(requestId);
         byte[] operationCodeBytes = ToBytesUtil.int_to_bytes(operationCode);
         byte[] filenameLenBytes = ToBytesUtil.int_to_bytes(filename.length());
         byte[] fileAttributeLenBytes = ToBytesUtil.int_to_bytes((attribute.length()));
@@ -257,10 +259,12 @@ public class Marshaller {
         byte[] attributeBytes = attribute.getBytes();
 
         // Combine all parts into a single byte array
-        byte[] messageBytes = new byte[Integer.BYTES * 3 + filenameBytes.length + attributeBytes.length];
+        byte[] messageBytes = new byte[Integer.BYTES * 4 + filenameBytes.length + attributeBytes.length];
 
         // Need to do this manually to add the bytes after each other in the byte array:
         int offset = 0;
+        System.arraycopy(requestIdBytes, 0, messageBytes, offset, Integer.BYTES);
+        offset += Integer.BYTES;
         System.arraycopy(operationCodeBytes, 0, messageBytes, offset, Integer.BYTES);
         offset += Integer.BYTES;
         System.arraycopy(filenameLenBytes, 0, messageBytes, offset, Integer.BYTES);
