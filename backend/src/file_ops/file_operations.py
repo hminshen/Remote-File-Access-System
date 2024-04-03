@@ -347,7 +347,7 @@ def create_dir(dirName):
   target_dir = os.path.join(target_dir, dirName)
   
   try:
-    os.mkdir(target_dir) #Create directory
+    os.makedirs(target_dir) #Create directory
     msg = FileCreateDir(7, len(dirName), dirName)
     
     #marshall to get message bytes

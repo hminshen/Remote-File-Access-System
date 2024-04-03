@@ -32,7 +32,10 @@ class MonitoringThread(threading.Thread):
 
                 # Marshal to get the msg bytes:
                 message = marshal_functions.marshall_message(msg)
-                self.server_socket.sendto(message, self.client_address)
+                try:
+                    self.server_socket.sendto(message, self.client_address)
+                except:
+                    print("Unknown Error occurred when sending error message")
                 return
 
             # Check if the file has been modified
@@ -47,7 +50,10 @@ class MonitoringThread(threading.Thread):
                                                     self.filename, time.ctime(last_modified_time), updatedFileContents)
                     # Finally, marshal to get the msg bytes and send the message:
                     message = marshal_functions.marshall_message(msg)
-                    self.server_socket.sendto(message, self.client_address)
+                    try:
+                        self.server_socket.sendto(message, self.client_address)
+                    except:
+                        print("Unknown Error occurred when sending update message")
                 # Reset the last modified time to be the new original modified time
                 self.original_modified_time = last_modified_time
             
@@ -66,4 +72,7 @@ class MonitoringThread(threading.Thread):
         
         # Finally, marshal to get the msg bytes and send the message
         message = marshal_functions.marshall_message(msg)
-        self.server_socket.sendto(message, self.client_address)
+        try:
+            self.server_socket.sendto(message, self.client_address)
+        except:
+            print("Unknown Error occurred while sending stop message")

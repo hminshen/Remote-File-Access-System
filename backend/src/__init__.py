@@ -141,8 +141,11 @@ while True:
             time.sleep(args.rep_delay / 1000)
 
         # Send the message back to the client
-        server_socket.sendto(message, address)
-        print("Response sent")
+        try:
+            server_socket.sendto(message, address)
+            print("Response sent")
+        except:
+            print("Unknown Error occurred")
 
 # Close the socket
 # server_socket.close()

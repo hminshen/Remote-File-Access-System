@@ -163,6 +163,8 @@ public class Client {
 
                 }
             }
+            // Re-update the request ID if get attribute req was sent:
+            msg.setRequestId(requestId);
             // Marshal the message
             byte[] marshalledMessage = Marshaller.marshal(msg);
 

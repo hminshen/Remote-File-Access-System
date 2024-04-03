@@ -16,7 +16,9 @@ public class FileClientReadReqMessage {
         this.bytesToRead = bytesToRead;
         this.filename = filename;
     }
-
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
+    }
     public int getRequestId() {
         return requestId;
     }

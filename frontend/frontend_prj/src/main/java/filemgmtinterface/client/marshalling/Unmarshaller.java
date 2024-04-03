@@ -132,7 +132,7 @@ public class Unmarshaller {
         int operationCode = FromBytesUtil.bytes_to_int(msg, 0);
         int filenameLen = FromBytesUtil.bytes_to_int(msg, 4);
         int contentLen = FromBytesUtil.bytes_to_int(msg, 8);
-        String filename = new String(msg, 8, filenameLen);
+        String filename = new String(msg, 12, filenameLen);
 
         FileClientCreateFileRespMessage response = new FileClientCreateFileRespMessage(operationCode, filenameLen,
                 contentLen, filename);
