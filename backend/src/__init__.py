@@ -40,13 +40,18 @@ print(f"Using RMI semantic: {'At-Most-Once' if args.semantic == 0 else 'At-Least
 # Dict to store history of past requests
 history = HistoryDict(args.history)
 
+# req_ctr = 0
+# rep_ctr = 0
+
 while True:
     try:
         # Receive data from the client
         data, address = server_socket.recvfrom(1024)  # Buffer size for receiving data
+        # req_ctr += 1
         
         # Simulate request loss
         if random.random() < args.req_loss:
+        # if req_ctr % 3 != 0:    # Fixed simulation of request loss (every 3rd request success)
             print("[Simulating transmission error: Request lost]")
             continue    # Request does not get processed at all
         else:
@@ -121,6 +126,8 @@ while True:
 
             
         if message is not None:
+            # rep_ctr += 1
+            
             # Store response in history if not already recorded (At-Most-Once)
             if args.semantic == 0 and request_key not in history:
                 history[request_key] = message
@@ -133,6 +140,7 @@ while True:
             
             # Simulate reply loss
             if random.random() < args.rep_loss:
+            # if rep_ctr % 3 != 0:    # Fixed simulation of reply loss (every 3rd reply success)
                 print("[Simulating transmission error: Reply lost]")
                 continue    # Reply does not get sent at all
             
