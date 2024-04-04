@@ -134,7 +134,7 @@ while True:
                 print(f"Response stored for request ID {request_key}")
                 
             # Debugging
-            print(f"Request history:\n\t{'\n\t'.join(str(k) for k in history)}")
+            # print(f"Request history:\n\t{'\n\t'.join(str(k) for k in history)}")
             # If AMO, should be updated when there is a new request. If ALO, should be empty
             print("Sending response message of", message, "to ", address, "...")
             
