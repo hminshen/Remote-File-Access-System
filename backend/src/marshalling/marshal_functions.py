@@ -239,14 +239,14 @@ def marshall_file_deletefile(message : FileDeleteFileMessage):
 #marshall_message function above checks the class of input and route accordingly 
 def marshall_create_dir(message: FileCreateDir):
   
-   # Convert integers to network byte order (big-endian)
+  # Convert integers to network byte order (big-endian)
   operation_code_bytes = int_to_bytes(message.operation_code)
   dirname_len_bytes = int_to_bytes(message.dirname_len)
 
-  #Encode dirname as UTF-8 Bytes
+  # Encode dirname as UTF-8 Bytes
   dirname_bytes = message.dirname.encode("utf-8")
 
-  #Combine all the marshalled bytes 
+  # Combine all the marshalled bytes 
   message_bytes = (
     operation_code_bytes +
     dirname_len_bytes +
