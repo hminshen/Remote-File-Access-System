@@ -8,7 +8,7 @@ from file_ops import file_operations
 from utils import HistoryDict
 
 # Server details
-HOST = ""  # Server's IP address - Set to local host for now
+HOST = "34.133.3.235"  # Server's IP address - Set to local host for now
 PORT = 3389  # Set port number
 
 # Parse command line arguments

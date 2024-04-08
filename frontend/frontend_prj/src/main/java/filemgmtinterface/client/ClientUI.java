@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 public class ClientUI {
     public static void showUI(int freshness, int maxretries, int timeout) {
-        Client client = new Client("localhost", 5000, maxretries, timeout);
+        Client client = new Client("34.133.3.235", 3389, maxretries, timeout);
         Scanner myObj = new Scanner(System.in);
         int choice = 0;
         // Initialize the cache list:
@@ -126,7 +126,7 @@ public class ClientUI {
                         System.out.println("Invalid values given please try again");
                     }
                 }
-                
+
                 // List directory contents operation:
                 else if (choice == 8) {
                     try {
@@ -138,7 +138,7 @@ public class ClientUI {
                         System.out.println("Error encounted");
                     }
                 }
-                
+
                 // Default
                 else if (choice == 0) {
                     System.out.println("Thank you for using our file management system!");
