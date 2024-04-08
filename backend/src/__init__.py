@@ -8,8 +8,8 @@ from file_ops import file_operations
 from utils import HistoryDict
 
 # Server details
-HOST = "localhost"  # Server's IP address - Set to local host for now
-PORT = 5000  # Set port number
+HOST = ""  # Server's IP address - Set to local host for now
+PORT = 3389  # Set port number
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description="Server for file operations")

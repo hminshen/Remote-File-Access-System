@@ -19,8 +19,8 @@ from marshalling import marshal_functions, unmarshal_functions
 from marshalling.message_types.file_access import FileClientReadMessage
 
 # Server details (same as server script)
-HOST = "localhost"  # Replace with server's IP address if needed
-PORT = 5000  # Same port number as server
+HOST = "34.133.3.235"  # Replace with server's IP address if needed
+PORT = 3389  # Same port number as server
 
 # Create a UDP socket
 client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
