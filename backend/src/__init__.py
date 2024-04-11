@@ -8,7 +8,10 @@ from file_ops import file_operations
 from utils import HistoryDict
 
 # Server details
-HOST = "localhost"  # Server's IP address - Set to local host for now
+# HOST = "localhost"  # Server's IP address - Set to local host for now
+ip_addr = socket.gethostbyname(socket.gethostname())
+print(f"Server address: {ip_addr}")
+HOST = ip_addr
 PORT = 5000  # Set port number
 
 # Parse command line arguments
